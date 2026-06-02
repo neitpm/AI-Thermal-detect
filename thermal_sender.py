@@ -27,7 +27,7 @@ LOCAL_RECEIVER_URL = "http://127.0.0.1:8080/api/thermal-data"
 POINTS_CONFIG_PATH = os.path.join("timeseries_service", "data", "thermal_points.json")
 
 # Polling interval in seconds (5 minutes)
-POLL_INTERVAL = 300
+POLL_INTERVAL = 30
 
 def parse_multipart(data, boundary):
     """Phân tách gói tin multipart từ Hikvision để lấy JSON metadata và P2P binary data."""
@@ -82,6 +82,10 @@ def get_camera_temperatures():
                             x = float(pt.get("x", 0.0))
                             y = float(pt.get("y", 0.0))
                             
+                            # Nếu tọa độ là 0,0 (chưa cấu hình), bỏ qua để dùng camera rules
+                            if x == 0.0 and y == 0.0:
+                                continue
+                                
                             # Quy đổi tọa độ tỷ lệ (0.0-1.0) sang index ma trận
                             mx = int(x * w)
                             my = int(y * h)
@@ -93,7 +97,9 @@ def get_camera_temperatures():
                                 "id": label,  # Sử dụng label làm định danh gửi về Dashboard
                                 "temperature": round(temp, 1)
                             })
-                        return points
+                        
+                        if points:
+                            return points
                 else:
                     print(f"[SENDER WARNING] HTTP {response.status_code} khi truy vấn P2P matrix. Chuyển sang dùng camera rules.", flush=True)
         except Exception as e:
@@ -108,12 +114,11 @@ def get_camera_temperatures():
             points = []
             for rule in rules_info:
                 rule_id = rule.get("id")
-                if rule_id in [1, 2, 3, 4, 5, 6]:
-                    temp = rule.get("maxTemperature")
-                    points.append({
-                        "id": f"ID_{rule_id}",
-                        "temperature": temp
-                    })
+                temp = rule.get("maxTemperature")
+                points.append({
+                    "id": f"Điểm {rule_id}",
+                    "temperature": temp
+                })
             points.sort(key=lambda x: x["id"])
             return points
         else:

@@ -12,6 +12,8 @@ import pycuda.driver as cuda
 import pycuda.autoinit
 from concurrent.futures import ThreadPoolExecutor
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # =========================
 # SOURCE CONFIG
 # =========================
@@ -220,6 +222,35 @@ def send_detection_api(person_count, boxes, frame_bgr):
         print(f"[API] Loi gui API: {e}")
 
 
+def send_video_api(video_path):
+    if not os.path.exists(video_path):
+        return
+    payload = {
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "camera_ip": CAMERA_IP,
+        "alert_type": "person_detection_video",
+    }
+    try:
+        print(f"[API-VIDEO] Dang gui video {video_path}...")
+        with open(video_path, "rb") as f:
+            response = requests.post(
+                API_URL,
+                data={"metadata": json.dumps(payload, ensure_ascii=False)},
+                files={"video": (os.path.basename(video_path), f, "video/mp4")},
+                timeout=30,
+            )
+        print(f"[API-VIDEO] Ket qua: status={response.status_code} | response={response.text}")
+    except Exception as e:
+        print(f"[API-VIDEO] Loi gui video API: {e}")
+    finally:
+        try:
+            if os.path.exists(video_path):
+                os.remove(video_path)
+                print(f"[API-VIDEO] Da xoa file tam local: {video_path}")
+        except Exception as ex:
+            print(f"[API-VIDEO] Khong xoa duoc file tam {video_path}: {ex}")
+
+
 # =========================
 # THREADED FRAME READER
 # =========================
@@ -266,6 +297,14 @@ last_has_person = False
 api_executor = ThreadPoolExecutor(max_workers=API_MAX_WORKERS)
 api_future = None
 
+# Video recording state variables
+is_recording = False
+video_writer = None
+temp_video_path = None
+last_person_seen_time = 0
+event_grace_period = 3.0  # seconds
+event_alert_sent = True
+
 cached_draw = None
 cached_count = 0
 cached_boxes = []
@@ -292,21 +331,54 @@ try:
         prev_time = curr_time
 
         has_person = count > 0
-        should_send = (
-            (has_person and not last_has_person)
-            or (has_person and curr_time - last_api_sent_time >= MIN_API_INTERVAL)
-        )
-        api_busy = api_future is not None and not api_future.done()
-        if should_send and not api_busy:
-            api_future = api_executor.submit(
-                send_detection_api, count, list(cached_boxes), img_draw.copy()
-            )
-            last_api_sent_time = curr_time
+        
+        # LOGGING CHO DETECTION
+        if has_person and not last_has_person:
+            print(f"[YOLO-EVENT] Phat hien {count} nguoi trong khung hinh.")
+        elif not has_person and last_has_person:
+            print(f"[YOLO-EVENT] Het nguoi trong khung hinh.")
+
+        # --- EVENT VIDEO RECORDING LOGIC ---
+        if has_person:
+            last_person_seen_time = curr_time
+            if not is_recording:
+                is_recording = True
+                event_alert_sent = False  # Reset the alert flag for the new event!
+                h, w = frame.shape[:2]
+                temp_video_path = os.path.join(BASE_DIR, f"event_{int(curr_time)}.mp4")
+                fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+                video_writer = cv2.VideoWriter(temp_video_path, fourcc, 10.0, (w, h))
+                print(f"[YOLO-VIDEO] Bat dau ghi hinh su kien nguoi: {temp_video_path}")
+            
+        if is_recording:
+            video_writer.write(img_draw)
+            
+            if not has_person and (curr_time - last_person_seen_time >= event_grace_period):
+                is_recording = False
+                video_writer.release()
+                print(f"[YOLO-VIDEO] Ket thuc su kien ghi hinh. Dang gui video ngam...")
+                api_executor.submit(send_video_api, temp_video_path)
+
+        # --- INSTANT ALERT LOGIC (ALARM IMMEDIATELY ON FIRST SPOT) ---
+        if has_person and not event_alert_sent:
+            api_busy = api_future is not None and not api_future.done()
+            if not api_busy:
+                api_future = api_executor.submit(
+                    send_detection_api, count, list(cached_boxes), img_draw.copy()
+                )
+                event_alert_sent = True  # Mark as sent so we don't send again during this event!
 
         last_has_person = has_person
         time.sleep(0.002)
 
 finally:
     reader.stop()
+    if is_recording and video_writer is not None:
+        try:
+            video_writer.release()
+            print(f"[YOLO-VIDEO] Dong file video truoc khi dung.")
+            send_video_api(temp_video_path)
+        except Exception:
+            pass
     api_executor.shutdown(wait=False, cancel_futures=True)
     print("[SYSTEM] Da dung tat ca tien trinh thanh cong.")

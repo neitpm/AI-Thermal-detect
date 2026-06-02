@@ -111,19 +111,9 @@ def main():
     else:
         print("[INIT] Đã tắt dịch vụ YOLO Person Detection (Thermal Only).")
 
-    # 3. Khởi động Thermal Sender (Edge Service) (ĐÃ COMMENT - VÌ MÁY CHỦ SẼ GỬI DỮ LIỆU NHIỆT XUỐNG)
+    # 3. Khởi động Thermal Sender (Edge Service) - Đã tắt để chuyển sang chế độ thụ động nhận dữ liệu
     p_sender = None
-    # print("[INIT] Khởi động Thermal Sender...")
-    # p_sender = subprocess.Popen(
-    #     [sys.executable, "-u", SENDER_SCRIPT],
-    #     cwd=BASE_DIR,
-    #     stdout=subprocess.PIPE,
-    #     stderr=subprocess.STDOUT,
-    #     text=True,
-    #     bufsize=1
-    # )
-    # processes.append(p_sender)
-    print("[INIT] Đã comment (tạm dừng) dịch vụ Thermal Sender (quét camera).")
+    print("[INIT] Chế độ Reactive: Đã tắt tự động quét camera. Chờ dữ liệu đẩy tới...")
 
     # 4. Tạo các luồng đọc log song song, không chặn (Non-blocking log forwarding)
     t_thermal = threading.Thread(target=forward_output, args=(p_thermal.stdout, "[THERMAL]"), daemon=True)
@@ -133,16 +123,12 @@ def main():
         t_yolo = threading.Thread(target=forward_output, args=(p_yolo.stdout, "[YOLO]"), daemon=True)
         t_yolo.start()
         
-    # if p_sender:
-    #     t_sender = threading.Thread(target=forward_output, args=(p_sender.stdout, "[SENDER]"), daemon=True)
-    #     t_sender.start()
-
     time.sleep(3)
 
     # Kiểm tra trạng thái khởi động ban đầu
     thermal_status = "ĐANG CHẠY" if p_thermal.poll() is None else "LỖI KHỞI ĐỘNG"
     yolo_status = "ĐANG CHẠY" if (p_yolo and p_yolo.poll() is None) else "TẮT"
-    sender_status = "TẮT (ĐÃ COMMENT)"
+    sender_status = "TẮT (CHẾ ĐỘ REACTIVE)"
 
     print("\n" + "-" * 70)
     print(f"[*] Thermal Receiver (Port 8080)   : {thermal_status}")
@@ -160,10 +146,6 @@ def main():
 
             if p_yolo and p_yolo.poll() is not None:
                 print(f"[CẢNH BÁO] YOLOv8 Person Detect đã dừng đột ngột với exit code {p_yolo.returncode}!")
-                break
-
-            if p_sender and p_sender.poll() is not None:
-                print(f"[CẢNH BÁO] Thermal Sender đã dừng đột ngột với exit code {p_sender.returncode}!")
                 break
 
             time.sleep(1)
