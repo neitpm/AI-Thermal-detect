@@ -41,7 +41,7 @@ MAX_ASPECT_RATIO = 1.20
 # =========================
 API_URL = "http://192.168.10.102:5000/api/person-detection"
 CAMERA_IP = "192.168.10.152"
-MIN_API_INTERVAL = 5
+MIN_API_INTERVAL = 60  # Cooldown cảnh báo tức thời (giây) để tránh gửi spam tin nhắn
 API_TIMEOUT = 5
 API_MAX_WORKERS = 1
 JPEG_QUALITY = 85
@@ -197,7 +197,7 @@ def detect_persons(frame):
     return img_draw, count, boxes
 
 
-def send_detection_api(person_count, boxes, frame_bgr):
+def send_detection_api(person_count, boxes):
     payload = {
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         "camera_ip": CAMERA_IP,
@@ -205,21 +205,15 @@ def send_detection_api(person_count, boxes, frame_bgr):
         "alert_type": "person_detected",
         "boxes": boxes,
     }
-    success, encoded_img = cv2.imencode(".jpg", frame_bgr,
-                                        [int(cv2.IMWRITE_JPEG_QUALITY), JPEG_QUALITY])
-    if not success:
-        print("[API] Loi encode anh")
-        return
     try:
         response = requests.post(
             API_URL,
             data={"metadata": json.dumps(payload, ensure_ascii=False)},
-            files={"image": (f"person_{int(time.time())}.jpg", encoded_img.tobytes(), "image/jpeg")},
             timeout=API_TIMEOUT,
         )
-        print(f"[API] status={response.status_code} | {response.text}")
+        print(f"[API-ALERT] Gui canh bao thanh cong: status={response.status_code} | {response.text}")
     except Exception as e:
-        print(f"[API] Loi gui API: {e}")
+        print(f"[API-ALERT] Loi gui canh bao: {e}")
 
 
 def send_video_api(video_path):
@@ -361,12 +355,9 @@ try:
 
         # --- INSTANT ALERT LOGIC (ALARM IMMEDIATELY ON FIRST SPOT) ---
         if has_person and not event_alert_sent:
-            api_busy = api_future is not None and not api_future.done()
-            if not api_busy:
-                api_future = api_executor.submit(
-                    send_detection_api, count, list(cached_boxes), img_draw.copy()
-                )
-                event_alert_sent = True  # Mark as sent so we don't send again during this event!
+            # Set to True immediately so we NEVER trigger another alert request during this active event session
+            event_alert_sent = True
+            api_executor.submit(send_detection_api, count, list(cached_boxes))
 
         last_has_person = has_person
         time.sleep(0.002)

@@ -31,3 +31,4 @@ timeseries_service/data/live_evaluations.csv
 timeseries_service/tf_env/
 timeseries_service/.codex
 timeseries_service/.git_backup/
+*.mp4

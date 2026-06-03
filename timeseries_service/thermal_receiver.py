@@ -145,36 +145,48 @@ def sync_csv_headers(path: str, expected_headers: list) -> None:
 def save_history_row(row: dict) -> pd.DataFrame:
     global _cached_history_df
     
-    # 1. Fast append to CSV (aligned with ACTUAL headers on disk)
     file_exists = os.path.exists(RAW_HISTORY_CSV)
     if file_exists:
         try:
-            headers = list(pd.read_csv(RAW_HISTORY_CSV, nrows=0).columns)
+            df = pd.read_csv(RAW_HISTORY_CSV)
         except Exception:
-            headers = ["Timestamp"] + TARGETS
+            df = pd.DataFrame()
     else:
-        headers = ["Timestamp"] + TARGETS
+        df = pd.DataFrame()
 
-    row_df = pd.DataFrame([row])
-    # Ensure all expected columns exist and are ordered correctly
+    headers = ["Timestamp"] + TARGETS
     for col in headers:
-        if col not in row_df.columns:
-            row_df[col] = None
-    row_df = row_df[headers]
-    
-    row_df.to_csv(RAW_HISTORY_CSV, mode='a', header=not file_exists, index=False)
-    
-    # 2. Update memory cache (keep only last 200 rows for prediction)
-    if _cached_history_df is None:
-        if file_exists:
-            _cached_history_df = pd.read_csv(RAW_HISTORY_CSV).tail(200)
-        else:
-            _cached_history_df = row_df.copy()
-    else:
-        _cached_history_df = pd.concat([_cached_history_df, row_df], ignore_index=True)
-        if len(_cached_history_df) > 200:
-            _cached_history_df = _cached_history_df.tail(200)
+        if col not in df.columns:
+            df[col] = None
+
+    is_merged = False
+    if not df.empty:
+        last_time_str = df.iloc[-1]["Timestamp"]
+        try:
+            last_time = pd.to_datetime(last_time_str)
+            curr_time = pd.to_datetime(row["Timestamp"])
+            time_diff = abs((curr_time - last_time).total_seconds())
+        except Exception:
+            time_diff = 999.0
             
+        if time_diff <= 5.0:
+            last_idx = df.index[-1]
+            for col, val in row.items():
+                if col != "Timestamp" and pd.notna(val) and val is not None:
+                    df.at[last_idx, col] = val
+            is_merged = True
+            print(f"[MERGE] Merged split payload for {row['Timestamp']} into last row {last_time_str}")
+
+    if not is_merged:
+        row_df = pd.DataFrame([row])
+        for col in headers:
+            if col not in row_df.columns:
+                row_df[col] = None
+        row_df = row_df[headers]
+        df = pd.concat([df, row_df], ignore_index=True)
+
+    df.to_csv(RAW_HISTORY_CSV, index=False)
+    _cached_history_df = df.tail(200)
     return _cached_history_df
 
 
@@ -266,8 +278,8 @@ def save_prediction(history_df: pd.DataFrame, active_targets: list = None) -> di
         "forecast_timestamp": to_timestamp_text(forecast_timestamp),
     }
 
-    # Chỉ lấy dự báo cho các target đang hoạt động
-    targets_to_process = active_targets if active_targets is not None else TARGETS
+    # Luôn tính toán và trả về toàn bộ targets trong cấu hình để đảm bảo Server trung tâm đầy đủ thông tin
+    targets_to_process = TARGETS
     for target in targets_to_process:
         try:
             pred_col = TARGET_TO_PRED_COL.get(target, f"{target}_t5")
@@ -284,35 +296,49 @@ def save_prediction(history_df: pd.DataFrame, active_targets: list = None) -> di
             print(f"[PREDICT-ERROR] Lỗi khi trích xuất dự báo cho {target}: {e}")
             record[f"{target}_pred"] = 30.0
 
-    # 1. Fast append to CSV (aligned with ACTUAL headers on disk)
+    # 1. Fast append to CSV or overwrite last row if split payload
     file_exists = os.path.exists(PREDICTIONS_CSV)
     if file_exists:
         try:
-            pred_headers = list(pd.read_csv(PREDICTIONS_CSV, nrows=0).columns)
+            df = pd.read_csv(PREDICTIONS_CSV)
         except Exception:
-            pred_headers = ["issued_at", "input_timestamp", "forecast_timestamp"] + [f"{t}_pred" for t in TARGETS]
+            df = pd.DataFrame()
     else:
-        pred_headers = ["issued_at", "input_timestamp", "forecast_timestamp"] + [f"{t}_pred" for t in TARGETS]
+        df = pd.DataFrame()
 
-    row_df = pd.DataFrame([record])
-    # Ensure all expected columns exist and are ordered correctly
+    pred_headers = ["issued_at", "input_timestamp", "forecast_timestamp"] + [f"{t}_pred" for t in TARGETS]
     for col in pred_headers:
-        if col not in row_df.columns:
-            row_df[col] = None
-    row_df = row_df[pred_headers]
+        if col not in df.columns:
+            df[col] = None
 
-    row_df.to_csv(PREDICTIONS_CSV, mode='a', header=not file_exists, index=False)
-    
-    # 2. Update cache
-    if _cached_predictions_df is None:
-        if file_exists:
-            _cached_predictions_df = pd.read_csv(PREDICTIONS_CSV).tail(100)
-        else:
-            _cached_predictions_df = row_df.copy()
-    else:
-        _cached_predictions_df = pd.concat([_cached_predictions_df, row_df], ignore_index=True)
-        if len(_cached_predictions_df) > 100:
-            _cached_predictions_df = _cached_predictions_df.tail(100)
+    is_merged = False
+    if not df.empty:
+        last_input_time_str = df.iloc[-1]["input_timestamp"]
+        try:
+            last_time = pd.to_datetime(last_input_time_str)
+            curr_time = pd.to_datetime(record["input_timestamp"])
+            time_diff = abs((curr_time - last_time).total_seconds())
+        except Exception:
+            time_diff = 999.0
+            
+        if time_diff <= 5.0:
+            last_idx = df.index[-1]
+            for col, val in record.items():
+                if pd.notna(val) and val is not None:
+                    df.at[last_idx, col] = val
+            is_merged = True
+            print(f"[MERGE] Overwrote split prediction for {record['input_timestamp']} in last row")
+
+    if not is_merged:
+        row_df = pd.DataFrame([record])
+        for col in pred_headers:
+            if col not in row_df.columns:
+                row_df[col] = None
+        row_df = row_df[pred_headers]
+        df = pd.concat([df, row_df], ignore_index=True)
+
+    df.to_csv(PREDICTIONS_CSV, index=False)
+    _cached_predictions_df = df.tail(100)
 
     return record
 
@@ -539,6 +565,11 @@ async def receive_thermal_data(request: Request):
             if lbl in TARGETS:
                 active_targets.append(lbl)
 
+        # Nếu không có target nào hoạt động trong gói tin này (ví dụ: chỉ chứa điểm đã bị xoá/không theo dõi), bỏ qua hoàn toàn để tránh lưu dòng trống
+        if not active_targets:
+            print("[THERMAL] Gói tin không chứa bất kỳ điểm/vùng nào trong cấu hình TARGETS. Bỏ qua không xử lý.")
+            return {"status": "skipped", "message": "No active targets in payload, skipping history and prediction"}
+
         prediction = None
         prediction_status = "not_started"
         callback_result = None
@@ -619,6 +650,13 @@ async def save_thermal_config(request: Request, forward: bool = True):
     """
     try:
         data = await request.json()
+        
+        # Bỏ qua nếu đây thực tế là gói tin đo nhiệt độ từ camera gửi nhầm tới endpoint cấu hình
+        is_measurement = any("temperature" in p for p in data.get("points", []))
+        if is_measurement:
+            print("[CONFIG-WARNING] Nhận gói tin đo nhiệt tại endpoint /config/thermal. Bỏ qua cấu hình.", flush=True)
+            return {"success": False, "error": "Endpoint dành cho cấu hình tọa độ, không phải dữ liệu đo nhiệt."}
+
         config_path = os.path.join(DATA_DIR, "thermal_points.json")
         with open(config_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
@@ -633,10 +671,13 @@ async def save_thermal_config(request: Request, forward: bool = True):
             except Exception as e:
                 print(f"[CONFIG-ERROR] Failed to forward config/thermal to central server: {e}")
 
-        # 1b. Tự động đồng bộ targets từ các points vừa nhận vào config.json
+        # 1b. Tự động đồng bộ targets từ các points và zones vừa nhận vào config.json
+        targets = []
         if "points" in data:
-            targets = [p.get("label") or p.get("id") for p in data["points"] if p.get("label") or p.get("id")]
-            if targets:
+            targets.extend([p.get("label") or p.get("id") for p in data["points"] if p.get("label") or p.get("id")])
+        if "zones" in data:
+            targets.extend([z.get("label") or z.get("id") for z in data["zones"] if z.get("label") or z.get("id")])
+        if targets:
                 config_path_json = "model/config.json"
                 if os.path.exists(config_path_json):
                     with open(config_path_json, "r", encoding="utf-8") as f:

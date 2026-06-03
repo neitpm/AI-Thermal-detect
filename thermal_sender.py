@@ -165,8 +165,7 @@ def sync_targets_with_server():
     """Tự động đồng bộ danh sách targets từ Central Server về local receiver."""
     try:
         # 1. Gọi sang PC/Server để lấy danh sách điểm đang cấu hình ở file config.json
-        base_url = "/".join(SERVER_URL.split("/")[:3]) # Lấy http://192.168.10.22:8100
-        config_url = f"{base_url}/api/config"
+        config_url = f"{base_url}/api/config?camera_ip={CAMERA_IP}"
         
         resp = requests.get(config_url, timeout=3.0)
         if resp.status_code != 200:
