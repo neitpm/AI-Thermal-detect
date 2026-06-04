@@ -68,6 +68,14 @@
             "pre_alarm": 50,
             "alarm": 70,
             "label": "Điểm 1"
+        },
+        {
+            "id": "D9",
+            "x": 0.7549,
+            "y": 0.7587,
+            "pre_alarm": 50,
+            "alarm": 70,
+            "label": "Điểm 9"
         }
     ],
     "zones": [

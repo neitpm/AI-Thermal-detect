@@ -8,6 +8,7 @@
         "Điểm 8",
         "Điểm 2",
         "Điểm 1",
+        "Điểm 9",
         "Vùng 1",
         "Vùng 2"
     ],
@@ -47,6 +48,10 @@
         "Điểm 1_trend",
         "Điểm 1_seasonal",
         "Điểm 1_residual",
+        "Điểm 9",
+        "Điểm 9_trend",
+        "Điểm 9_seasonal",
+        "Điểm 9_residual",
         "Vùng 1",
         "Vùng 1_trend",
         "Vùng 1_seasonal",
@@ -65,6 +70,7 @@
         "Điểm 8_t5",
         "Điểm 2_t5",
         "Điểm 1_t5",
+        "Điểm 9_t5",
         "Vùng 1_t5",
         "Vùng 2_t5"
     ]
