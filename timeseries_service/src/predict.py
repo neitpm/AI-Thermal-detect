@@ -5,17 +5,20 @@ import pandas as pd
 import numpy as np
 
 # Load configuration dynamically
-def load_current_config():
-    with open("model/config.json", "r", encoding="utf-8") as f:
+def load_current_config(camera_id: str = "192_168_10_152"):
+    config_path = f"model/{camera_id}_config.json"
+    if not os.path.exists(config_path):
+        config_path = "model/config.json"
+    with open(config_path, "r", encoding="utf-8") as f:
         cfg = json.load(f)
     return cfg
 
-def reload_model_weights():
+def reload_model_weights(camera_id: str = "192_168_10_152"):
     # Giữ lại để đảm bảo tính tương thích với hàm gọi từ main/daemon
     return True
 
-def predict_last(data_df: pd.DataFrame) -> pd.DataFrame:
-    cfg = load_current_config()
+def predict_last(data_df: pd.DataFrame, camera_id: str = "192_168_10_152") -> pd.DataFrame:
+    cfg = load_current_config(camera_id)
     targets = cfg["targets"]
     target_cols = cfg["target_cols"]
     horizon = cfg["horizon"]
@@ -26,12 +29,14 @@ def predict_last(data_df: pd.DataFrame) -> pd.DataFrame:
     
     # Thử load mô hình Linear Regression đã được lưu từ file pkl
     lr_models = None
-    lr_path = "model/linear_reg.pkl"
+    lr_path = f"model/{camera_id}_linear_reg.pkl"
+    if not os.path.exists(lr_path):
+        lr_path = "model/linear_reg.pkl"
     if os.path.exists(lr_path):
         try:
             lr_models = joblib.load(lr_path)
         except Exception as e:
-            print(f"[PREDICT] Lỗi load linear regression model: {e}", flush=True)
+            print(f"[PREDICT] Lỗi load linear regression model cho {camera_id}: {e}", flush=True)
             
     for target in targets:
         pred_col = target_to_pred_col[target]
@@ -124,10 +129,10 @@ def predict_last(data_df: pd.DataFrame) -> pd.DataFrame:
         
     return result_df
 
-def predict_all_windows(data_df: pd.DataFrame) -> pd.DataFrame:
+def predict_all_windows(data_df: pd.DataFrame, camera_id: str = "192_168_10_152") -> pd.DataFrame:
     # Hàm này dùng để phân tích offline/đánh giá, ta trả về DataFrame rỗng nếu không dùng
     # nhằm tránh lỗi tương thích khi gọi
-    cfg = load_current_config()
+    cfg = load_current_config(camera_id)
     targets = cfg["targets"]
     target_cols = cfg["target_cols"]
     return pd.DataFrame(columns=["window_end_index", "Timestamp"] + target_cols)

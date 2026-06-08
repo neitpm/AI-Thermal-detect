@@ -4,15 +4,44 @@ import numpy as np
 import pandas as pd
 from statsmodels.tsa.seasonal import STL
 
-with open("model/config.json", "r", encoding="utf-8") as f:
-    config = json.load(f)
+import os
 
-FEATURE_COLS = config["feature_cols"]
-WINDOW_SIZE = config["window_size"]
-TARGETS = config["targets"]
-SEASONAL_PERIOD = config["seasonal_period"]
+# Default values
+config = {}
+FEATURE_COLS = []
+WINDOW_SIZE = 5
+TARGETS = []
+SEASONAL_PERIOD = 60
+scaler_X = None
 
-scaler_X = joblib.load("model/scaler_X.pkl")
+def load_config(camera_id: str = "192_168_10_152"):
+    global config, FEATURE_COLS, WINDOW_SIZE, TARGETS, SEASONAL_PERIOD, scaler_X
+    config_path = f"model/{camera_id}_config.json"
+    if not os.path.exists(config_path):
+        config_path = "model/config.json"
+    
+    if os.path.exists(config_path):
+        try:
+            with open(config_path, "r", encoding="utf-8") as f:
+                config = json.load(f)
+            FEATURE_COLS = config.get("feature_cols", [])
+            WINDOW_SIZE = config.get("window_size", 5)
+            TARGETS = config.get("targets", [])
+            SEASONAL_PERIOD = config.get("seasonal_period", 60)
+        except Exception as e:
+            print(f"[PREPROCESS-ERROR] Lỗi load config: {e}")
+            
+    scaler_path = f"model/{camera_id}_scaler_X.pkl"
+    if not os.path.exists(scaler_path):
+        scaler_path = "model/scaler_X.pkl"
+    if os.path.exists(scaler_path):
+        try:
+            scaler_X = joblib.load(scaler_path)
+        except Exception:
+            pass
+
+# Khởi tạo mặc định
+load_config()
 
 
 def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:

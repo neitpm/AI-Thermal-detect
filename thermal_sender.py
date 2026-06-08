@@ -132,6 +132,7 @@ def send_to_server(points):
     """POST the thermal data to both local receiver and central server."""
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     payload = {
+        "camera_ip": CAMERA_IP,
         "timestamp": timestamp,
         "points": points
     }

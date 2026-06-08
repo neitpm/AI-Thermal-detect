@@ -15,8 +15,26 @@ HISTORY_PATH = "data/live_thermal_history.csv"
 LR_MODEL_PATH = "model/linear_reg.pkl"
 
 def main():
+    global CONFIG_PATH, WEIGHTS_PATH, HISTORY_PATH, LR_MODEL_PATH
+    
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--camera_id", default="192_168_10_152", help="Camera ID to retrain")
+    args, unknown = parser.parse_known_args()
+    camera_id = args.camera_id
+
+    # Cập nhật đường dẫn theo camera_id
+    CONFIG_PATH = f"model/{camera_id}_config.json"
+    if not os.path.exists(CONFIG_PATH):
+        CONFIG_PATH = "model/config.json"
+    WEIGHTS_PATH = f"model/{camera_id}_mtkan_weights.weights.h5"
+    HISTORY_PATH = f"data/{camera_id}_live_thermal_history.csv"
+    if not os.path.exists(HISTORY_PATH):
+        HISTORY_PATH = "data/live_thermal_history.csv"
+    LR_MODEL_PATH = f"model/{camera_id}_linear_reg.pkl"
+
     print("=" * 70)
-    print("           HUẤN LUYỆN LẠI MODEL DỰ BÁO NHIỆT ĐỘ (RETRAIN)            ")
+    print(f"   HUẤN LUYỆN LẠI MODEL DỰ BÁO NHIỆT ĐỘ CHO {camera_id} (RETRAIN)   ")
     print("=" * 70)
 
     # 1. Load Cấu hình
@@ -100,25 +118,28 @@ def main():
         try:
             print("[TRAIN-MTKAN] Đang chuẩn bị huấn luyện lại MTKAN...")
             from tensorflow import keras
-            from src.preprocess import prepare_feature_df
+            from src.preprocess import prepare_feature_df, load_config as load_preprocess_config
             from src.model_builder import build_mtkan_model
             
             # Chuẩn hóa & Trích xuất đặc trưng (Features STL)
+            load_preprocess_config(camera_id)
             df_features = prepare_feature_df(df_raw)
             FEATURE_COLS = config["feature_cols"]
             
             # Load Scalers nếu có, nếu chưa có tạo mới
+            scaler_X_path = f"model/{camera_id}_scaler_X.pkl"
+            scaler_y_path = f"model/{camera_id}_scaler_y.pkl"
             try:
-                scaler_X = joblib.load("model/scaler_X.pkl")
-                scaler_y = joblib.load("model/scaler_y.pkl")
+                scaler_X = joblib.load(scaler_X_path)
+                scaler_y = joblib.load(scaler_y_path)
             except Exception:
                 from sklearn.preprocessing import StandardScaler
                 scaler_X = StandardScaler()
                 scaler_y = StandardScaler()
                 scaler_X.fit(df_features[FEATURE_COLS].values)
                 scaler_y.fit(df_features[TARGETS].values)
-                joblib.dump(scaler_X, "model/scaler_X.pkl")
-                joblib.dump(scaler_y, "model/scaler_y.pkl")
+                joblib.dump(scaler_X, scaler_X_path)
+                joblib.dump(scaler_y, scaler_y_path)
             
             X_raw = df_features[FEATURE_COLS].values
             y_raw = df_features[TARGETS].values
