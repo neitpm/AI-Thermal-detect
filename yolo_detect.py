@@ -251,6 +251,7 @@ def send_video_api(video_path):
 class FrameReader(threading.Thread):
     def __init__(self, src):
         super().__init__(daemon=True)
+        self.src = src
         self.cap = cv2.VideoCapture(src, cv2.CAP_FFMPEG)
         self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         if not self.cap.isOpened():
@@ -261,8 +262,26 @@ class FrameReader(threading.Thread):
         self._stop_event = threading.Event()
 
     def run(self):
+        consecutive_failures = 0
         while not self._stop_event.is_set():
             ret, frame = self.cap.read()
+            if not ret or frame is None:
+                consecutive_failures += 1
+                # Nếu không đọc được hình mới quá 100 lần liên tiếp (tương ứng khoảng 3-5 giây)
+                if consecutive_failures >= 100:
+                    print("[YOLO-READER] Mat ket noi camera. Dang tien hanh ket noi lai...", flush=True)
+                    try:
+                        self.cap.release()
+                    except Exception:
+                        pass
+                    time.sleep(5)
+                    self.cap = cv2.VideoCapture(self.src, cv2.CAP_FFMPEG)
+                    self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+                    consecutive_failures = 0
+                time.sleep(0.03)
+                continue
+            
+            consecutive_failures = 0
             with self._lock:
                 self.ret = ret
                 self.frame = frame
@@ -276,7 +295,10 @@ class FrameReader(threading.Thread):
     def stop(self):
         self._stop_event.set()
         self.join(timeout=2)
-        self.cap.release()
+        try:
+            self.cap.release()
+        except Exception:
+            pass
 
 
 # =========================

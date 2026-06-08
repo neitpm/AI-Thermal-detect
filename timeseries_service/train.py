@@ -46,6 +46,12 @@ def main():
         
     print(f"[DATA] Đọc thành công {len(df_raw)} dòng dữ liệu từ {HISTORY_PATH}")
 
+    # Điền giá trị trống bằng Forward Fill (ffill) rồi Backward Fill (bfill) để giữ trục thời gian thẳng hàng
+    df_filled = df_raw.copy()
+    for col in TARGETS:
+        if col in df_filled.columns:
+            df_filled[col] = df_filled[col].ffill().bfill()
+
     # 3. Huấn luyện Linear Regression Autoregressive Model cho từng Target
     lr_models = {}
     print("[TRAIN-LR] Bắt đầu huấn luyện Linear Regression cho các nhãn mới...")
@@ -59,7 +65,12 @@ def main():
                 # Tạo X (các lag) và y (nhãn dịch chuyển)
                 X_list = []
                 y_list = []
-                series = df_raw[target].dropna().values
+                if target in df_filled.columns:
+                    series = df_filled[target].values
+                    # Lọc bỏ NaN còn sót lại nếu có
+                    series = series[~np.isnan(series)]
+                else:
+                    series = np.array([])
                 
                 if len(series) >= min_len_required:
                     for i in range(len(series) - WINDOW_SIZE - HORIZON + 1):

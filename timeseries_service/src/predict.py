@@ -61,28 +61,33 @@ def predict_last(data_df: pd.DataFrame) -> pd.DataFrame:
         if lr_models and target in lr_models:
             try:
                 model_lr = lr_models[target]
-                # Lấy 5 giá trị gần nhất của target làm đầu vào (lags)
-                lags = data_df[target].tail(window_size).values
-                # Chuyển đổi lags sang float, thay thế NaN bằng safe value
+                # Lấy các giá trị hợp lệ (dropna) của target này để tránh các dòng rỗng
+                series_clean = data_df[target].dropna()
+                lags = series_clean.tail(window_size).values
+                
+                # Chuyển đổi lags sang float
                 lags_clean = []
                 for v in lags:
                     try:
-                        lags_clean.append(float(v) if pd.notna(v) else 30.0)
+                        lags_clean.append(float(v))
                     except:
-                        lags_clean.append(30.0)
+                        pass
                 lags_clean = np.array(lags_clean)
                 
                 if len(lags_clean) == window_size:
                     pred_val = float(model_lr.predict([lags_clean])[0])
-                    predictions[pred_col] = pred_val
-                    continue
+                    # Giới hạn giá trị dự báo trong khoảng vật lý hợp lý [15.0, 60.0]
+                    # Nếu vượt quá khoảng này, coi như lỗi dự báo và sẽ chạy phương án fallback
+                    if 15.0 <= pred_val <= 60.0:
+                        predictions[pred_col] = pred_val
+                        continue
             except Exception as e:
                 print(f"[PREDICT] Lỗi khi chạy LR model cho {target}: {e}", flush=True)
                 
         # Phương án dự phòng (Fallback): Khớp xu hướng tuyến tính trên 10 điểm gần nhất
         try:
-            # Lọc bỏ giá trị không hợp lệ
-            subset = data_df[target].tail(10).dropna()
+            # Lọc bỏ giá trị không hợp lệ của target này trước rồi mới lấy tail
+            subset = data_df[target].dropna().tail(10)
             subset_clean = []
             for v in subset.values:
                 try:
@@ -99,7 +104,10 @@ def predict_last(data_df: pd.DataFrame) -> pd.DataFrame:
                 slope, intercept = np.polyfit(x, y, 1)
                 # Dự báo thời điểm tương lai (tương ứng với +horizon bước)
                 pred_val = float(slope * (len(y) - 1 + horizon) + intercept)
-                predictions[pred_col] = pred_val
+                if 15.0 <= pred_val <= 60.0:
+                    predictions[pred_col] = pred_val
+                else:
+                    predictions[pred_col] = get_safe_last_val(data_df, target)
             else:
                 # Nếu quá ít dữ liệu, giữ nguyên giá trị gần nhất cho ổn định
                 predictions[pred_col] = get_safe_last_val(data_df, target)

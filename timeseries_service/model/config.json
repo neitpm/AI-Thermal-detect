@@ -9,8 +9,8 @@
         "Điểm 2",
         "Điểm 1",
         "Điểm 9",
-        "Vùng 1",
-        "Vùng 2"
+        "Vùng 2",
+        "Vùng 1"
     ],
     "window_size": 5,
     "horizon": 5,
@@ -52,14 +52,14 @@
         "Điểm 9_trend",
         "Điểm 9_seasonal",
         "Điểm 9_residual",
-        "Vùng 1",
-        "Vùng 1_trend",
-        "Vùng 1_seasonal",
-        "Vùng 1_residual",
         "Vùng 2",
         "Vùng 2_trend",
         "Vùng 2_seasonal",
-        "Vùng 2_residual"
+        "Vùng 2_residual",
+        "Vùng 1",
+        "Vùng 1_trend",
+        "Vùng 1_seasonal",
+        "Vùng 1_residual"
     ],
     "target_cols": [
         "Điểm 3_t5",
@@ -71,7 +71,7 @@
         "Điểm 2_t5",
         "Điểm 1_t5",
         "Điểm 9_t5",
-        "Vùng 1_t5",
-        "Vùng 2_t5"
+        "Vùng 2_t5",
+        "Vùng 1_t5"
     ]
 }
