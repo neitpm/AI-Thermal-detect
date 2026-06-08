@@ -186,11 +186,12 @@ def to_timestamp_text(value):
     return ts.strftime("%Y-%m-%d %H:%M:%S")
 
 
-def prune_received_data(max_files: int = 50):
+def prune_received_data(camera_id: str, max_files: int = 50):
     try:
-        if not os.path.exists(SAVE_DIR):
+        cam_save_dir = os.path.join(SAVE_DIR, camera_id)
+        if not os.path.exists(cam_save_dir):
             return
-        files = [os.path.join(SAVE_DIR, f) for f in os.listdir(SAVE_DIR) if f.endswith(".json")]
+        files = [os.path.join(cam_save_dir, f) for f in os.listdir(cam_save_dir) if f.endswith(".json")]
         if len(files) > max_files:
             files.sort(key=os.path.getmtime, reverse=True)
             for old_file in files[max_files:]:
@@ -199,7 +200,7 @@ def prune_received_data(max_files: int = 50):
                 except Exception:
                     pass
     except Exception as e:
-        print(f"[CLEANUP-WARNING] Lỗi khi dọn dẹp received_data: {e}")
+        print(f"[CLEANUP-WARNING] Lỗi khi dọn dẹp received_data cho {camera_id}: {e}")
 
 
 def thermal_json_to_row(data: dict, camera_id: str = "192_168_10_152") -> dict:
@@ -667,21 +668,25 @@ async def receive_thermal_data(request: Request):
     try:
         data = await request.json()
 
-        # lưu raw json ra file để kiểm tra
-        now_str = datetime.now().strftime("%Y%m%d_%H%M%S")
-        file_path = os.path.join(SAVE_DIR, f"thermal_{now_str}.json")
-
-        with open(file_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-
-        # Tự động dọn dẹp để giữ tối đa 50 file log mới nhất
-        prune_received_data(max_files=50)
-
         # Lấy camera_id
         camera_id = get_camera_id(data, request)
         cfg = get_camera_config(camera_id)
         targets = cfg["targets"]
         id_to_label = cfg["id_to_label"]
+
+        # Tạo thư mục lưu log riêng cho từng camera
+        cam_save_dir = os.path.join(SAVE_DIR, camera_id)
+        os.makedirs(cam_save_dir, exist_ok=True)
+
+        # lưu raw json ra file để kiểm tra
+        now_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+        file_path = os.path.join(cam_save_dir, f"thermal_{now_str}.json")
+
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+
+        # Tự động dọn dẹp để giữ tối đa 50 file log mới nhất cho camera này
+        prune_received_data(camera_id, max_files=50)
 
         print(f"=== NHẬN DỮ LIỆU THÀNH CÔNG TỪ CAMERA {camera_id} ===")
         print(json.dumps(data, ensure_ascii=False, indent=2))
