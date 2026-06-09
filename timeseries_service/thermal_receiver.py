@@ -28,6 +28,22 @@ PREDICTION_CALLBACK_URL = os.getenv(
 ).strip()
 CALLBACK_TIMEOUT_SECONDS = float(os.getenv("PREDICTION_CALLBACK_TIMEOUT", "5"))
 
+def resolve_callback_url(request: Request = None) -> str:
+    target_url = PREDICTION_CALLBACK_URL
+    if request and request.client and request.client.host:
+        client_ip = request.client.host
+        if client_ip not in ("127.0.0.1", "localhost"):
+            from urllib.parse import urlparse, urlunparse
+            try:
+                parsed = urlparse(target_url)
+                port = parsed.port or 8100
+                netloc = f"{client_ip}:{port}"
+                parsed = parsed._replace(netloc=netloc)
+                return urlunparse(parsed)
+            except Exception as e:
+                print(f"[CALLBACK-WARNING] Không thể parse/thay thế URL {target_url}: {e}")
+    return target_url
+
 # ==========================================
 # MIGRATION & MULTI-CAMERA PATH UTILITIES
 # ==========================================
@@ -728,10 +744,7 @@ async def receive_thermal_data(request: Request):
                 print(f"Lỗi khi dự đoán: {e}")
         # Thực hiện cơ chế PUSH dự báo sang Server trung tâm (hoặc bên thứ 3)
         if prediction:
-            target_url = PREDICTION_CALLBACK_URL
-            if not target_url:
-                client_ip = request.client.host
-                target_url = f"http://{client_ip}:8080/api/prediction"
+            target_url = resolve_callback_url(request)
             
             print(f"Đang gửi dự đoán tới {target_url}...")
             callback_result = send_prediction_callback(prediction, target_url=target_url)
@@ -943,7 +956,8 @@ async def update_forecasting_targets(request: Request, forward: bool = True):
                 with state_lock:
                     prediction = save_prediction(current_history, camera_id=camera_id, active_targets=targets)
                     if prediction:
-                        send_prediction_callback(prediction)
+                        target_url = resolve_callback_url(request)
+                        send_prediction_callback(prediction, target_url=target_url)
                         print(f"[CONFIG] Đã gửi dự báo cập nhật thành công cho {camera_id}!")
         except Exception as pred_ex:
             print(f"[CONFIG-ERROR] Không thể chạy dự báo tức thì cho {camera_id}: {pred_ex}")
