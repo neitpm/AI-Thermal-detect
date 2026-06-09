@@ -1,0 +1,14 @@
+{
+    "camera_ip": "192.168.10.200",
+    "timestamp": "2026-06-08 10:10:00",
+    "points": [
+        {
+            "id": "P1",
+            "temperature": 34.5
+        },
+        {
+            "id": "P2",
+            "temperature": 35.0
+        }
+    ]
+}

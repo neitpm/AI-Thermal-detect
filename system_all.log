@@ -1,0 +1,1039 @@
+======================================================================
+   KHỞI ĐỘNG HỆ THỐNG DUAL DAEOMON: YOLO DETECT + THERMAL RECEIVER   
+======================================================================
+[INIT] Đang dọn dẹp các tiến trình cũ chạy ngầm...
+[INIT] Khởi động Thermal Receiver API...
+[INIT] Khởi động YOLOv8 Headless Person Detection...
+[INIT] Khởi động Thermal Sender...
+[SENDER] ==================================================
+[SENDER] STARTING THERMAL DATA SENDER (EDGE SERVICE)
+[SENDER] Camera IP: 192.168.10.152
+[SENDER] Server URL: http://192.168.10.102:8100/api/thermal-data
+[SENDER] Interval: 30s
+[SENDER] ==================================================
+[YOLO] [TRT] Loading engine: models/yolov8n.engine
+[YOLO] [TRT] Engine loaded OK. Dang chay o che do headless (ngam)...
+[THERMAL] INFO:     Will watch for changes in these directories: ['/home/admin-khai/Desktop/smart_camera_edge_system/timeseries_service']
+[THERMAL] INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+[THERMAL] INFO:     Started reloader process [150900] using StatReload
+[THERMAL] [CONFIG] Da reload cấu hình. Targets mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1', 'Điểm 1', 'Điểm 10', 'Điểm 8', 'Điểm 9'] | ID Map: {}
+[YOLO] [hevc @ 0xaaab11ad5cd0] Could not find ref with POC 21
+[THERMAL] INFO:     Started server process [150936]
+[THERMAL] INFO:     Waiting for application startup.
+[THERMAL] INFO:     Application startup complete.
+
+----------------------------------------------------------------------
+[*] Thermal Receiver (Port 8080)   : ĐANG CHẠY
+[*] YOLOv8 Person Detect (Headless): ĐANG CHẠY
+[*] Thermal Sender (Edge Service)  : ĐANG CHẠY
+----------------------------------------------------------------------
+Hệ thống đang chạy ngầm song song. Bấm Ctrl+C để dừng.
+
+[THERMAL] [CONFIG] Da reload cấu hình. Targets mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1', 'Điểm 1', 'Điểm 10', 'Điểm 8', 'Điểm 9'] | ID Map: {}
+[THERMAL] [CONFIG] Da reload cấu hình. Targets mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1', 'Điểm 1', 'Điểm 10', 'Điểm 8', 'Điểm 9'] | ID Map: {}
+[THERMAL] [CONFIG] Đã nhận và lưu cấu hình điểm đo nhiệt mới vào: data/thermal_points.json
+[THERMAL] [CONFIG] Forwarding config/thermal to central server: http://192.168.10.102:8100/config/thermal
+[THERMAL] [CONFIG] Da reload cấu hình. Targets mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1'] | ID Map: {}
+[THERMAL] [CONFIG] Đã tự động đồng bộ targets từ points mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1']. Kích hoạt Retrain...
+[THERMAL] [AUTOTRAIN] Bắt đầu tự động huấn luyện lại model (Fine-tuning)...
+[THERMAL] INFO:     192.168.10.102:51348 - "POST /config/thermal HTTP/1.1" 200 OK
+[SENDER] [SENDER] Successfully fetched 10 points from camera.
+[SENDER] [SENDER] Sending data to local receiver: {'timestamp': '2026-06-01 17:14:28', 'points': [{'id': 'Điểm 1', 'temperature': 30.4}, {'id': 'Điểm 10', 'temperature': 30.0}, {'id': 'Điểm 2', 'temperature': 29.9}, {'id': 'Điểm 3', 'temperature': 29.7}, {'id': 'Điểm 4', 'temperature': 29.9}, {'id': 'Điểm 5', 'temperature': 29.7}, {'id': 'Điểm 6', 'temperature': 29.9}, {'id': 'Điểm 7', 'temperature': 30.1}, {'id': 'Điểm 8', 'temperature': 29.9}, {'id': 'Điểm 9', 'temperature': 30.1}]}
+[THERMAL] /home/admin-khai/Desktop/smart_camera_edge_system/timeseries_service/thermal_receiver.py:271: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+[THERMAL] _cached_predictions_df = pd.concat([_cached_predictions_df, row_df], ignore_index=True)
+[THERMAL] === NHẬN DỮ LIỆU THÀNH CÔNG ===
+[THERMAL] {
+[THERMAL] "timestamp": "2026-06-01 17:14:28",
+[THERMAL] "points": [
+[THERMAL] {
+[THERMAL] "id": "Điểm 1",
+[THERMAL] "temperature": 30.4
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 10",
+[THERMAL] "temperature": 30.0
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 2",
+[THERMAL] "temperature": 29.9
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 3",
+[THERMAL] "temperature": 29.7
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 4",
+[THERMAL] "temperature": 29.9
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 5",
+[THERMAL] "temperature": 29.7
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 6",
+[THERMAL] "temperature": 29.9
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 7",
+[THERMAL] "temperature": 30.1
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 8",
+[THERMAL] "temperature": 29.9
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 9",
+[THERMAL] "temperature": 30.1
+[THERMAL] }
+[THERMAL] ]
+[THERMAL] }
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 1. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 10. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 8. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 9. Tự động thêm vào danh sách xử lý.
+[THERMAL] Dữ liệu hiện có: 1 dòng trong lịch sử. Active: ['Điểm 1', 'Điểm 10', 'Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Điểm 8', 'Điểm 9']
+[THERMAL] Dự đoán thành công!
+[THERMAL] Đang gửi dự đoán tới http://192.168.10.102:8100/api/prediction...
+[THERMAL] Gửi thành công tới http://192.168.10.102:8100/api/prediction
+[THERMAL] Đã lưu history: 1 dòng
+[THERMAL] Chưa có prediction cũ đến hạn để so sánh
+[THERMAL] Trạng thái dự đoán mới: created
+[THERMAL] {
+[THERMAL] "issued_at": "2026-06-01 17:14:28",
+[THERMAL] "input_timestamp": "1970-01-01 00:00:00",
+[THERMAL] "forecast_timestamp": "1970-01-01 00:05:00",
+[THERMAL] "Điểm 1_pred": 30.0,
+[THERMAL] "Điểm 10_pred": 30.0,
+[THERMAL] "Điểm 2_pred": 29.9,
+[THERMAL] "Điểm 3_pred": 29.7,
+[THERMAL] "Điểm 4_pred": 29.9,
+[THERMAL] "Điểm 5_pred": 30.1,
+[THERMAL] "Điểm 6_pred": 29.9,
+[THERMAL] "Điểm 7_pred": 30.1,
+[THERMAL] "Điểm 8_pred": 30.0,
+[THERMAL] "Điểm 9_pred": 30.0
+[THERMAL] }
+[THERMAL] INFO:     127.0.0.1:48488 - "POST /api/thermal-data HTTP/1.1" 200 OK
+[SENDER] [SENDER SUCCESS] Local receiver processed successfully: {"success":true,"message":"Đã nhận dữ liệu nhiệt","received_at":"2026-06-01 17:14:29","actual_row":{"Timestamp":"2026-06-01 17:14:28","Điểm 1":30.4,"Điểm 10":30.0,"Điểm 2":29.9,"Điểm 3":29.7,"Điểm 4":29.9,"Điểm 5":29.7,"Điểm 6":29.9,"Điểm 7":30.1,"Điểm 8":29.9,"Điểm 9":30.1,"Vùng 1":null},"history_rows":1,"evaluation":null,"prediction_status":"created","prediction":{"issued_at":"2026-06-01 17:14:28","input_timestamp":"1970-01-01 00:00:00","forecast_timestamp":"1970-01-01 00:05:00","Điểm 1_pred":30.0,"Điểm 10_pred":30.0,"Điểm 2_pred":29.9,"Điểm 3_pred":29.7,"Điểm 4_pred":29.9,"Điểm 5_pred":30.1,"Điểm 6_pred":29.9,"Điểm 7_pred":30.1,"Điểm 8_pred":30.0,"Điểm 9_pred":30.0},"prediction_callback":{"sent":true,"status_code":200,"response":"{\"success\":true,\"saved\":6,\"legacy_saved\":0}"}}
+[SENDER] [SENDER] Sending data to central server: {'timestamp': '2026-06-01 17:14:28', 'points': [{'id': 'Điểm 1', 'temperature': 30.4}, {'id': 'Điểm 10', 'temperature': 30.0}, {'id': 'Điểm 2', 'temperature': 29.9}, {'id': 'Điểm 3', 'temperature': 29.7}, {'id': 'Điểm 4', 'temperature': 29.9}, {'id': 'Điểm 5', 'temperature': 29.7}, {'id': 'Điểm 6', 'temperature': 29.9}, {'id': 'Điểm 7', 'temperature': 30.1}, {'id': 'Điểm 8', 'temperature': 29.9}, {'id': 'Điểm 9', 'temperature': 30.1}]}
+[SENDER] [SENDER SUCCESS] Central server response: {"success":true,"timestamp":"2026-06-01 17:14:28","targets_received":["Điểm 2","Điểm 3","Điểm 4","Điểm 5","Điểm 6","Điểm 7","Vùng 1"],"prediction":null}
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN-LOG] HUẤN LUYỆN LẠI MODEL DỰ BÁO NHIỆT ĐỘ (RETRAIN)
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN-LOG] [CONFIG] Window Size: 5 | Horizon: 5
+[THERMAL] [AUTOTRAIN-LOG] [CONFIG] Targets (11): ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1', 'Điểm 1', 'Điểm 10', 'Điểm 8', 'Điểm 9']
+[THERMAL] [AUTOTRAIN-LOG] [DATA] Đọc thành công 1 dòng dữ liệu từ data/live_thermal_history.csv
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-LR] Bắt đầu huấn luyện Linear Regression cho các nhãn mới...
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-LR WARNING] Dữ liệu lịch sử hiện tại (1 dòng) ít hơn mức tối thiểu (10 dòng) để huấn luyện Linear Regression. Sử dụng chế độ Extrapolation tuyến tính tự động lúc dự đoán.
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-MTKAN WARNING] Chưa đủ 100 dòng dữ liệu lịch sử để kích hoạt huấn luyện lại MTKAN.
+[THERMAL] [AUTOTRAIN-LOG] [SUCCESS] Tiến trình huấn luyện hoàn thành tốt đẹp!
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN] Đã hoàn thành tự động huấn luyện lại model. Exit code: 0
+[SENDER] [SENDER] Phát hiện danh sách targets thay đổi trên Server: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1']. Đang đồng bộ về local...
+[THERMAL] [CONFIG] Da reload cấu hình. Targets mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1'] | ID Map: {}
+[THERMAL] [CONFIG] Đã cập nhật targets dự báo mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1']. Làm sạch dữ liệu cũ và kích hoạt Retrain...
+[THERMAL] [AUTOTRAIN] Bắt đầu tự động huấn luyện lại model (Fine-tuning)...
+[THERMAL] INFO:     127.0.0.1:49934 - "POST /api/config/update?forward=false HTTP/1.1" 200 OK
+[SENDER] [SENDER SUCCESS] Đã đồng bộ targets thành công về local receiver.
+[SENDER] [SENDER] Sending data to local receiver: {'timestamp': '2026-06-01 17:15:00', 'points': [{'id': 'Điểm 1', 'temperature': 30.5}, {'id': 'Điểm 10', 'temperature': 30.6}, {'id': 'Điểm 2', 'temperature': 30.3}, {'id': 'Điểm 3', 'temperature': 30.6}, {'id': 'Điểm 4', 'temperature': 29.6}, {'id': 'Điểm 5', 'temperature': 30.4}, {'id': 'Điểm 6', 'temperature': 29.9}, {'id': 'Điểm 7', 'temperature': 29.7}, {'id': 'Điểm 8', 'temperature': 30.3}, {'id': 'Điểm 9', 'temperature': 29.7}]}
+[THERMAL] /home/admin-khai/Desktop/smart_camera_edge_system/timeseries_service/thermal_receiver.py:271: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+[THERMAL] _cached_predictions_df = pd.concat([_cached_predictions_df, row_df], ignore_index=True)
+[THERMAL] === NHẬN DỮ LIỆU THÀNH CÔNG ===
+[THERMAL] {
+[THERMAL] "timestamp": "2026-06-01 17:15:00",
+[THERMAL] "points": [
+[THERMAL] {
+[THERMAL] "id": "Điểm 1",
+[THERMAL] "temperature": 30.5
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 10",
+[THERMAL] "temperature": 30.6
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 2",
+[THERMAL] "temperature": 30.3
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 3",
+[THERMAL] "temperature": 30.6
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 4",
+[THERMAL] "temperature": 29.6
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 5",
+[THERMAL] "temperature": 30.4
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 6",
+[THERMAL] "temperature": 29.9
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 7",
+[THERMAL] "temperature": 29.7
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 8",
+[THERMAL] "temperature": 30.3
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 9",
+[THERMAL] "temperature": 29.7
+[THERMAL] }
+[THERMAL] ]
+[THERMAL] }
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 1. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 10. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 8. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 9. Tự động thêm vào danh sách xử lý.
+[THERMAL] Dữ liệu hiện có: 1 dòng trong lịch sử. Active: ['Điểm 1', 'Điểm 10', 'Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Điểm 8', 'Điểm 9']
+[THERMAL] Dự đoán thành công!
+[THERMAL] Đang gửi dự đoán tới http://192.168.10.102:8100/api/prediction...
+[THERMAL] Gửi thành công tới http://192.168.10.102:8100/api/prediction
+[THERMAL] Đã lưu history: 1 dòng
+[THERMAL] Chưa có prediction cũ đến hạn để so sánh
+[THERMAL] Trạng thái dự đoán mới: created
+[THERMAL] {
+[THERMAL] "issued_at": "2026-06-01 17:15:00",
+[THERMAL] "input_timestamp": "1970-01-01 00:00:00",
+[THERMAL] "forecast_timestamp": "1970-01-01 00:05:00",
+[THERMAL] "Điểm 1_pred": 30.0,
+[THERMAL] "Điểm 10_pred": 30.0,
+[THERMAL] "Điểm 2_pred": 29.6,
+[THERMAL] "Điểm 3_pred": 30.4,
+[THERMAL] "Điểm 4_pred": 29.9,
+[THERMAL] "Điểm 5_pred": 29.7,
+[THERMAL] "Điểm 6_pred": 30.3,
+[THERMAL] "Điểm 7_pred": 29.7,
+[THERMAL] "Điểm 8_pred": 30.0,
+[THERMAL] "Điểm 9_pred": 30.0
+[THERMAL] }
+[THERMAL] INFO:     127.0.0.1:49940 - "POST /api/thermal-data HTTP/1.1" 200 OK
+[SENDER] [SENDER SUCCESS] Local receiver processed successfully: {"success":true,"message":"Đã nhận dữ liệu nhiệt","received_at":"2026-06-01 17:15:00","actual_row":{"Timestamp":"2026-06-01 17:15:00","Điểm 1":30.5,"Điểm 10":30.6,"Điểm 2":30.3,"Điểm 3":30.6,"Điểm 4":29.6,"Điểm 5":30.4,"Điểm 6":29.9,"Điểm 7":29.7,"Điểm 8":30.3,"Điểm 9":29.7,"Vùng 1":null},"history_rows":1,"evaluation":null,"prediction_status":"created","prediction":{"issued_at":"2026-06-01 17:15:00","input_timestamp":"1970-01-01 00:00:00","forecast_timestamp":"1970-01-01 00:05:00","Điểm 1_pred":30.0,"Điểm 10_pred":30.0,"Điểm 2_pred":29.6,"Điểm 3_pred":30.4,"Điểm 4_pred":29.9,"Điểm 5_pred":29.7,"Điểm 6_pred":30.3,"Điểm 7_pred":29.7,"Điểm 8_pred":30.0,"Điểm 9_pred":30.0},"prediction_callback":{"sent":true,"status_code":200,"response":"{\"success\":true,\"saved\":6,\"legacy_saved\":0}"}}
+[SENDER] [SENDER] Sending data to central server: {'timestamp': '2026-06-01 17:15:00', 'points': [{'id': 'Điểm 1', 'temperature': 30.5}, {'id': 'Điểm 10', 'temperature': 30.6}, {'id': 'Điểm 2', 'temperature': 30.3}, {'id': 'Điểm 3', 'temperature': 30.6}, {'id': 'Điểm 4', 'temperature': 29.6}, {'id': 'Điểm 5', 'temperature': 30.4}, {'id': 'Điểm 6', 'temperature': 29.9}, {'id': 'Điểm 7', 'temperature': 29.7}, {'id': 'Điểm 8', 'temperature': 30.3}, {'id': 'Điểm 9', 'temperature': 29.7}]}
+[SENDER] [SENDER SUCCESS] Central server response: {"success":true,"timestamp":"2026-06-01 17:15:00","targets_received":["Điểm 2","Điểm 3","Điểm 4","Điểm 5","Điểm 6","Điểm 7","Vùng 1"],"prediction":null}
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN-LOG] HUẤN LUYỆN LẠI MODEL DỰ BÁO NHIỆT ĐỘ (RETRAIN)
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN-LOG] [CONFIG] Window Size: 5 | Horizon: 5
+[THERMAL] [AUTOTRAIN-LOG] [CONFIG] Targets (11): ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1', 'Điểm 1', 'Điểm 10', 'Điểm 8', 'Điểm 9']
+[THERMAL] [AUTOTRAIN-LOG] [DATA] Đọc thành công 1 dòng dữ liệu từ data/live_thermal_history.csv
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-LR] Bắt đầu huấn luyện Linear Regression cho các nhãn mới...
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-LR WARNING] Dữ liệu lịch sử hiện tại (1 dòng) ít hơn mức tối thiểu (10 dòng) để huấn luyện Linear Regression. Sử dụng chế độ Extrapolation tuyến tính tự động lúc dự đoán.
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-MTKAN WARNING] Chưa đủ 100 dòng dữ liệu lịch sử để kích hoạt huấn luyện lại MTKAN.
+[THERMAL] [AUTOTRAIN-LOG] [SUCCESS] Tiến trình huấn luyện hoàn thành tốt đẹp!
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN] Đã hoàn thành tự động huấn luyện lại model. Exit code: 0
+[SENDER] [SENDER] Phát hiện danh sách targets thay đổi trên Server: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1']. Đang đồng bộ về local...
+[THERMAL] [CONFIG] Da reload cấu hình. Targets mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1'] | ID Map: {}
+[THERMAL] [CONFIG] Đã cập nhật targets dự báo mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1']. Làm sạch dữ liệu cũ và kích hoạt Retrain...
+[THERMAL] [AUTOTRAIN] Bắt đầu tự động huấn luyện lại model (Fine-tuning)...
+[THERMAL] INFO:     127.0.0.1:47626 - "POST /api/config/update?forward=false HTTP/1.1" 200 OK
+[SENDER] [SENDER SUCCESS] Đã đồng bộ targets thành công về local receiver.
+[SENDER] [SENDER] Sending data to local receiver: {'timestamp': '2026-06-01 17:15:31', 'points': [{'id': 'Điểm 1', 'temperature': 30.1}, {'id': 'Điểm 10', 'temperature': 30.0}, {'id': 'Điểm 2', 'temperature': 30.3}, {'id': 'Điểm 3', 'temperature': 30.0}, {'id': 'Điểm 4', 'temperature': 30.0}, {'id': 'Điểm 5', 'temperature': 30.1}, {'id': 'Điểm 6', 'temperature': 29.9}, {'id': 'Điểm 7', 'temperature': 29.6}, {'id': 'Điểm 8', 'temperature': 30.0}, {'id': 'Điểm 9', 'temperature': 29.7}]}
+[THERMAL] /home/admin-khai/Desktop/smart_camera_edge_system/timeseries_service/thermal_receiver.py:271: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+[THERMAL] _cached_predictions_df = pd.concat([_cached_predictions_df, row_df], ignore_index=True)
+[THERMAL] === NHẬN DỮ LIỆU THÀNH CÔNG ===
+[THERMAL] {
+[THERMAL] "timestamp": "2026-06-01 17:15:31",
+[THERMAL] "points": [
+[THERMAL] {
+[THERMAL] "id": "Điểm 1",
+[THERMAL] "temperature": 30.1
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 10",
+[THERMAL] "temperature": 30.0
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 2",
+[THERMAL] "temperature": 30.3
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 3",
+[THERMAL] "temperature": 30.0
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 4",
+[THERMAL] "temperature": 30.0
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 5",
+[THERMAL] "temperature": 30.1
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 6",
+[THERMAL] "temperature": 29.9
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 7",
+[THERMAL] "temperature": 29.6
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 8",
+[THERMAL] "temperature": 30.0
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 9",
+[THERMAL] "temperature": 29.7
+[THERMAL] }
+[THERMAL] ]
+[THERMAL] }
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 1. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 10. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 8. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 9. Tự động thêm vào danh sách xử lý.
+[THERMAL] Dữ liệu hiện có: 1 dòng trong lịch sử. Active: ['Điểm 1', 'Điểm 10', 'Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Điểm 8', 'Điểm 9']
+[THERMAL] Dự đoán thành công!
+[THERMAL] Đang gửi dự đoán tới http://192.168.10.102:8100/api/prediction...
+[THERMAL] Gửi thành công tới http://192.168.10.102:8100/api/prediction
+[THERMAL] Đã lưu history: 1 dòng
+[THERMAL] Chưa có prediction cũ đến hạn để so sánh
+[THERMAL] Trạng thái dự đoán mới: created
+[THERMAL] {
+[THERMAL] "issued_at": "2026-06-01 17:15:31",
+[THERMAL] "input_timestamp": "1970-01-01 00:00:00",
+[THERMAL] "forecast_timestamp": "1970-01-01 00:05:00",
+[THERMAL] "Điểm 1_pred": 30.0,
+[THERMAL] "Điểm 10_pred": 30.0,
+[THERMAL] "Điểm 2_pred": 30.0,
+[THERMAL] "Điểm 3_pred": 30.1,
+[THERMAL] "Điểm 4_pred": 29.9,
+[THERMAL] "Điểm 5_pred": 29.6,
+[THERMAL] "Điểm 6_pred": 30.0,
+[THERMAL] "Điểm 7_pred": 29.7,
+[THERMAL] "Điểm 8_pred": 30.0,
+[THERMAL] "Điểm 9_pred": 30.0
+[THERMAL] }
+[THERMAL] INFO:     127.0.0.1:47638 - "POST /api/thermal-data HTTP/1.1" 200 OK
+[SENDER] [SENDER SUCCESS] Local receiver processed successfully: {"success":true,"message":"Đã nhận dữ liệu nhiệt","received_at":"2026-06-01 17:15:31","actual_row":{"Timestamp":"2026-06-01 17:15:31","Điểm 1":30.1,"Điểm 10":30.0,"Điểm 2":30.3,"Điểm 3":30.0,"Điểm 4":30.0,"Điểm 5":30.1,"Điểm 6":29.9,"Điểm 7":29.6,"Điểm 8":30.0,"Điểm 9":29.7,"Vùng 1":null},"history_rows":1,"evaluation":null,"prediction_status":"created","prediction":{"issued_at":"2026-06-01 17:15:31","input_timestamp":"1970-01-01 00:00:00","forecast_timestamp":"1970-01-01 00:05:00","Điểm 1_pred":30.0,"Điểm 10_pred":30.0,"Điểm 2_pred":30.0,"Điểm 3_pred":30.1,"Điểm 4_pred":29.9,"Điểm 5_pred":29.6,"Điểm 6_pred":30.0,"Điểm 7_pred":29.7,"Điểm 8_pred":30.0,"Điểm 9_pred":30.0},"prediction_callback":{"sent":true,"status_code":200,"response":"{\"success\":true,\"saved\":6,\"legacy_saved\":0}"}}
+[SENDER] [SENDER] Sending data to central server: {'timestamp': '2026-06-01 17:15:31', 'points': [{'id': 'Điểm 1', 'temperature': 30.1}, {'id': 'Điểm 10', 'temperature': 30.0}, {'id': 'Điểm 2', 'temperature': 30.3}, {'id': 'Điểm 3', 'temperature': 30.0}, {'id': 'Điểm 4', 'temperature': 30.0}, {'id': 'Điểm 5', 'temperature': 30.1}, {'id': 'Điểm 6', 'temperature': 29.9}, {'id': 'Điểm 7', 'temperature': 29.6}, {'id': 'Điểm 8', 'temperature': 30.0}, {'id': 'Điểm 9', 'temperature': 29.7}]}
+[SENDER] [SENDER SUCCESS] Central server response: {"success":true,"timestamp":"2026-06-01 17:15:31","targets_received":["Điểm 2","Điểm 3","Điểm 4","Điểm 5","Điểm 6","Điểm 7","Vùng 1"],"prediction":null}
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN-LOG] HUẤN LUYỆN LẠI MODEL DỰ BÁO NHIỆT ĐỘ (RETRAIN)
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN-LOG] [CONFIG] Window Size: 5 | Horizon: 5
+[THERMAL] [AUTOTRAIN-LOG] [CONFIG] Targets (11): ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1', 'Điểm 1', 'Điểm 10', 'Điểm 8', 'Điểm 9']
+[THERMAL] [AUTOTRAIN-LOG] [DATA] Đọc thành công 1 dòng dữ liệu từ data/live_thermal_history.csv
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-LR] Bắt đầu huấn luyện Linear Regression cho các nhãn mới...
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-LR WARNING] Dữ liệu lịch sử hiện tại (1 dòng) ít hơn mức tối thiểu (10 dòng) để huấn luyện Linear Regression. Sử dụng chế độ Extrapolation tuyến tính tự động lúc dự đoán.
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-MTKAN WARNING] Chưa đủ 100 dòng dữ liệu lịch sử để kích hoạt huấn luyện lại MTKAN.
+[THERMAL] [AUTOTRAIN-LOG] [SUCCESS] Tiến trình huấn luyện hoàn thành tốt đẹp!
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN] Đã hoàn thành tự động huấn luyện lại model. Exit code: 0
+[SENDER] [SENDER] Phát hiện danh sách targets thay đổi trên Server: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1']. Đang đồng bộ về local...
+[THERMAL] [CONFIG] Da reload cấu hình. Targets mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1'] | ID Map: {}
+[THERMAL] [CONFIG] Đã cập nhật targets dự báo mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1']. Làm sạch dữ liệu cũ và kích hoạt Retrain...
+[THERMAL] [AUTOTRAIN] Bắt đầu tự động huấn luyện lại model (Fine-tuning)...
+[THERMAL] INFO:     127.0.0.1:45620 - "POST /api/config/update?forward=false HTTP/1.1" 200 OK
+[SENDER] [SENDER SUCCESS] Đã đồng bộ targets thành công về local receiver.
+[SENDER] [SENDER] Sending data to local receiver: {'timestamp': '2026-06-01 17:16:02', 'points': [{'id': 'Điểm 1', 'temperature': 30.5}, {'id': 'Điểm 10', 'temperature': 30.3}, {'id': 'Điểm 2', 'temperature': 30.1}, {'id': 'Điểm 3', 'temperature': 30.3}, {'id': 'Điểm 4', 'temperature': 30.0}, {'id': 'Điểm 5', 'temperature': 30.1}, {'id': 'Điểm 6', 'temperature': 30.3}, {'id': 'Điểm 7', 'temperature': 29.7}, {'id': 'Điểm 8', 'temperature': 29.6}, {'id': 'Điểm 9', 'temperature': 30.0}]}
+[THERMAL] /home/admin-khai/Desktop/smart_camera_edge_system/timeseries_service/thermal_receiver.py:271: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+[THERMAL] _cached_predictions_df = pd.concat([_cached_predictions_df, row_df], ignore_index=True)
+[THERMAL] === NHẬN DỮ LIỆU THÀNH CÔNG ===
+[THERMAL] {
+[THERMAL] "timestamp": "2026-06-01 17:16:02",
+[THERMAL] "points": [
+[THERMAL] {
+[THERMAL] "id": "Điểm 1",
+[THERMAL] "temperature": 30.5
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 10",
+[THERMAL] "temperature": 30.3
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 2",
+[THERMAL] "temperature": 30.1
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 3",
+[THERMAL] "temperature": 30.3
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 4",
+[THERMAL] "temperature": 30.0
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 5",
+[THERMAL] "temperature": 30.1
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 6",
+[THERMAL] "temperature": 30.3
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 7",
+[THERMAL] "temperature": 29.7
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 8",
+[THERMAL] "temperature": 29.6
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 9",
+[THERMAL] "temperature": 30.0
+[THERMAL] }
+[THERMAL] ]
+[THERMAL] }
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 1. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 10. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 8. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 9. Tự động thêm vào danh sách xử lý.
+[THERMAL] Dữ liệu hiện có: 1 dòng trong lịch sử. Active: ['Điểm 1', 'Điểm 10', 'Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Điểm 8', 'Điểm 9']
+[THERMAL] Dự đoán thành công!
+[THERMAL] Đang gửi dự đoán tới http://192.168.10.102:8100/api/prediction...
+[THERMAL] Gửi thành công tới http://192.168.10.102:8100/api/prediction
+[THERMAL] Đã lưu history: 1 dòng
+[THERMAL] Chưa có prediction cũ đến hạn để so sánh
+[THERMAL] Trạng thái dự đoán mới: created
+[THERMAL] {
+[THERMAL] "issued_at": "2026-06-01 17:16:02",
+[THERMAL] "input_timestamp": "1970-01-01 00:00:00",
+[THERMAL] "forecast_timestamp": "1970-01-01 00:05:00",
+[THERMAL] "Điểm 1_pred": 30.0,
+[THERMAL] "Điểm 10_pred": 30.0,
+[THERMAL] "Điểm 2_pred": 30.0,
+[THERMAL] "Điểm 3_pred": 30.1,
+[THERMAL] "Điểm 4_pred": 30.3,
+[THERMAL] "Điểm 5_pred": 29.7,
+[THERMAL] "Điểm 6_pred": 29.6,
+[THERMAL] "Điểm 7_pred": 30.0,
+[THERMAL] "Điểm 8_pred": 30.0,
+[THERMAL] "Điểm 9_pred": 30.0
+[THERMAL] }
+[THERMAL] INFO:     127.0.0.1:45636 - "POST /api/thermal-data HTTP/1.1" 200 OK
+[SENDER] [SENDER SUCCESS] Local receiver processed successfully: {"success":true,"message":"Đã nhận dữ liệu nhiệt","received_at":"2026-06-01 17:16:02","actual_row":{"Timestamp":"2026-06-01 17:16:02","Điểm 1":30.5,"Điểm 10":30.3,"Điểm 2":30.1,"Điểm 3":30.3,"Điểm 4":30.0,"Điểm 5":30.1,"Điểm 6":30.3,"Điểm 7":29.7,"Điểm 8":29.6,"Điểm 9":30.0,"Vùng 1":null},"history_rows":1,"evaluation":null,"prediction_status":"created","prediction":{"issued_at":"2026-06-01 17:16:02","input_timestamp":"1970-01-01 00:00:00","forecast_timestamp":"1970-01-01 00:05:00","Điểm 1_pred":30.0,"Điểm 10_pred":30.0,"Điểm 2_pred":30.0,"Điểm 3_pred":30.1,"Điểm 4_pred":30.3,"Điểm 5_pred":29.7,"Điểm 6_pred":29.6,"Điểm 7_pred":30.0,"Điểm 8_pred":30.0,"Điểm 9_pred":30.0},"prediction_callback":{"sent":true,"status_code":200,"response":"{\"success\":true,\"saved\":6,\"legacy_saved\":0}"}}
+[SENDER] [SENDER] Sending data to central server: {'timestamp': '2026-06-01 17:16:02', 'points': [{'id': 'Điểm 1', 'temperature': 30.5}, {'id': 'Điểm 10', 'temperature': 30.3}, {'id': 'Điểm 2', 'temperature': 30.1}, {'id': 'Điểm 3', 'temperature': 30.3}, {'id': 'Điểm 4', 'temperature': 30.0}, {'id': 'Điểm 5', 'temperature': 30.1}, {'id': 'Điểm 6', 'temperature': 30.3}, {'id': 'Điểm 7', 'temperature': 29.7}, {'id': 'Điểm 8', 'temperature': 29.6}, {'id': 'Điểm 9', 'temperature': 30.0}]}
+[SENDER] [SENDER SUCCESS] Central server response: {"success":true,"timestamp":"2026-06-01 17:16:02","targets_received":["Điểm 2","Điểm 3","Điểm 4","Điểm 5","Điểm 6","Điểm 7","Vùng 1"],"prediction":null}
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN-LOG] HUẤN LUYỆN LẠI MODEL DỰ BÁO NHIỆT ĐỘ (RETRAIN)
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN-LOG] [CONFIG] Window Size: 5 | Horizon: 5
+[THERMAL] [AUTOTRAIN-LOG] [CONFIG] Targets (11): ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1', 'Điểm 1', 'Điểm 10', 'Điểm 8', 'Điểm 9']
+[THERMAL] [AUTOTRAIN-LOG] [DATA] Đọc thành công 1 dòng dữ liệu từ data/live_thermal_history.csv
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-LR] Bắt đầu huấn luyện Linear Regression cho các nhãn mới...
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-LR WARNING] Dữ liệu lịch sử hiện tại (1 dòng) ít hơn mức tối thiểu (10 dòng) để huấn luyện Linear Regression. Sử dụng chế độ Extrapolation tuyến tính tự động lúc dự đoán.
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-MTKAN WARNING] Chưa đủ 100 dòng dữ liệu lịch sử để kích hoạt huấn luyện lại MTKAN.
+[THERMAL] [AUTOTRAIN-LOG] [SUCCESS] Tiến trình huấn luyện hoàn thành tốt đẹp!
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN] Đã hoàn thành tự động huấn luyện lại model. Exit code: 0
+[SENDER] [SENDER] Phát hiện danh sách targets thay đổi trên Server: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1']. Đang đồng bộ về local...
+[THERMAL] [CONFIG] Da reload cấu hình. Targets mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1'] | ID Map: {}
+[THERMAL] [CONFIG] Đã cập nhật targets dự báo mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1']. Làm sạch dữ liệu cũ và kích hoạt Retrain...
+[THERMAL] [AUTOTRAIN] Bắt đầu tự động huấn luyện lại model (Fine-tuning)...
+[THERMAL] INFO:     127.0.0.1:53928 - "POST /api/config/update?forward=false HTTP/1.1" 200 OK
+[SENDER] [SENDER SUCCESS] Đã đồng bộ targets thành công về local receiver.
+[SENDER] [SENDER] Sending data to local receiver: {'timestamp': '2026-06-01 17:16:33', 'points': [{'id': 'Điểm 1', 'temperature': 30.4}, {'id': 'Điểm 10', 'temperature': 30.4}, {'id': 'Điểm 2', 'temperature': 29.9}, {'id': 'Điểm 3', 'temperature': 30.6}, {'id': 'Điểm 4', 'temperature': 30.3}, {'id': 'Điểm 5', 'temperature': 30.1}, {'id': 'Điểm 6', 'temperature': 30.0}, {'id': 'Điểm 7', 'temperature': 30.1}, {'id': 'Điểm 8', 'temperature': 30.0}, {'id': 'Điểm 9', 'temperature': 29.4}]}
+[THERMAL] /home/admin-khai/Desktop/smart_camera_edge_system/timeseries_service/thermal_receiver.py:271: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+[THERMAL] _cached_predictions_df = pd.concat([_cached_predictions_df, row_df], ignore_index=True)
+[THERMAL] === NHẬN DỮ LIỆU THÀNH CÔNG ===
+[THERMAL] {
+[THERMAL] "timestamp": "2026-06-01 17:16:33",
+[THERMAL] "points": [
+[THERMAL] {
+[THERMAL] "id": "Điểm 1",
+[THERMAL] "temperature": 30.4
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 10",
+[THERMAL] "temperature": 30.4
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 2",
+[THERMAL] "temperature": 29.9
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 3",
+[THERMAL] "temperature": 30.6
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 4",
+[THERMAL] "temperature": 30.3
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 5",
+[THERMAL] "temperature": 30.1
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 6",
+[THERMAL] "temperature": 30.0
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 7",
+[THERMAL] "temperature": 30.1
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 8",
+[THERMAL] "temperature": 30.0
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 9",
+[THERMAL] "temperature": 29.4
+[THERMAL] }
+[THERMAL] ]
+[THERMAL] }
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 1. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 10. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 8. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 9. Tự động thêm vào danh sách xử lý.
+[THERMAL] Dữ liệu hiện có: 1 dòng trong lịch sử. Active: ['Điểm 1', 'Điểm 10', 'Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Điểm 8', 'Điểm 9']
+[THERMAL] Dự đoán thành công!
+[THERMAL] Đang gửi dự đoán tới http://192.168.10.102:8100/api/prediction...
+[THERMAL] Gửi thành công tới http://192.168.10.102:8100/api/prediction
+[THERMAL] Đã lưu history: 1 dòng
+[THERMAL] Chưa có prediction cũ đến hạn để so sánh
+[THERMAL] Trạng thái dự đoán mới: created
+[THERMAL] {
+[THERMAL] "issued_at": "2026-06-01 17:16:33",
+[THERMAL] "input_timestamp": "1970-01-01 00:00:00",
+[THERMAL] "forecast_timestamp": "1970-01-01 00:05:00",
+[THERMAL] "Điểm 1_pred": 30.0,
+[THERMAL] "Điểm 10_pred": 30.0,
+[THERMAL] "Điểm 2_pred": 30.3,
+[THERMAL] "Điểm 3_pred": 30.1,
+[THERMAL] "Điểm 4_pred": 30.0,
+[THERMAL] "Điểm 5_pred": 30.1,
+[THERMAL] "Điểm 6_pred": 30.0,
+[THERMAL] "Điểm 7_pred": 29.4,
+[THERMAL] "Điểm 8_pred": 30.0,
+[THERMAL] "Điểm 9_pred": 30.0
+[THERMAL] }
+[THERMAL] INFO:     127.0.0.1:53930 - "POST /api/thermal-data HTTP/1.1" 200 OK
+[SENDER] [SENDER SUCCESS] Local receiver processed successfully: {"success":true,"message":"Đã nhận dữ liệu nhiệt","received_at":"2026-06-01 17:16:33","actual_row":{"Timestamp":"2026-06-01 17:16:33","Điểm 1":30.4,"Điểm 10":30.4,"Điểm 2":29.9,"Điểm 3":30.6,"Điểm 4":30.3,"Điểm 5":30.1,"Điểm 6":30.0,"Điểm 7":30.1,"Điểm 8":30.0,"Điểm 9":29.4,"Vùng 1":null},"history_rows":1,"evaluation":null,"prediction_status":"created","prediction":{"issued_at":"2026-06-01 17:16:33","input_timestamp":"1970-01-01 00:00:00","forecast_timestamp":"1970-01-01 00:05:00","Điểm 1_pred":30.0,"Điểm 10_pred":30.0,"Điểm 2_pred":30.3,"Điểm 3_pred":30.1,"Điểm 4_pred":30.0,"Điểm 5_pred":30.1,"Điểm 6_pred":30.0,"Điểm 7_pred":29.4,"Điểm 8_pred":30.0,"Điểm 9_pred":30.0},"prediction_callback":{"sent":true,"status_code":200,"response":"{\"success\":true,\"saved\":6,\"legacy_saved\":0}"}}
+[SENDER] [SENDER] Sending data to central server: {'timestamp': '2026-06-01 17:16:33', 'points': [{'id': 'Điểm 1', 'temperature': 30.4}, {'id': 'Điểm 10', 'temperature': 30.4}, {'id': 'Điểm 2', 'temperature': 29.9}, {'id': 'Điểm 3', 'temperature': 30.6}, {'id': 'Điểm 4', 'temperature': 30.3}, {'id': 'Điểm 5', 'temperature': 30.1}, {'id': 'Điểm 6', 'temperature': 30.0}, {'id': 'Điểm 7', 'temperature': 30.1}, {'id': 'Điểm 8', 'temperature': 30.0}, {'id': 'Điểm 9', 'temperature': 29.4}]}
+[SENDER] [SENDER SUCCESS] Central server response: {"success":true,"timestamp":"2026-06-01 17:16:33","targets_received":["Điểm 2","Điểm 3","Điểm 4","Điểm 5","Điểm 6","Điểm 7","Vùng 1"],"prediction":null}
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN-LOG] HUẤN LUYỆN LẠI MODEL DỰ BÁO NHIỆT ĐỘ (RETRAIN)
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN-LOG] [CONFIG] Window Size: 5 | Horizon: 5
+[THERMAL] [AUTOTRAIN-LOG] [CONFIG] Targets (11): ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1', 'Điểm 1', 'Điểm 10', 'Điểm 8', 'Điểm 9']
+[THERMAL] [AUTOTRAIN-LOG] [DATA] Đọc thành công 1 dòng dữ liệu từ data/live_thermal_history.csv
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-LR] Bắt đầu huấn luyện Linear Regression cho các nhãn mới...
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-LR WARNING] Dữ liệu lịch sử hiện tại (1 dòng) ít hơn mức tối thiểu (10 dòng) để huấn luyện Linear Regression. Sử dụng chế độ Extrapolation tuyến tính tự động lúc dự đoán.
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-MTKAN WARNING] Chưa đủ 100 dòng dữ liệu lịch sử để kích hoạt huấn luyện lại MTKAN.
+[THERMAL] [AUTOTRAIN-LOG] [SUCCESS] Tiến trình huấn luyện hoàn thành tốt đẹp!
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN] Đã hoàn thành tự động huấn luyện lại model. Exit code: 0
+[SENDER] [SENDER] Phát hiện danh sách targets thay đổi trên Server: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1']. Đang đồng bộ về local...
+[THERMAL] [CONFIG] Da reload cấu hình. Targets mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1'] | ID Map: {}
+[THERMAL] [CONFIG] Đã cập nhật targets dự báo mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1']. Làm sạch dữ liệu cũ và kích hoạt Retrain...
+[THERMAL] [AUTOTRAIN] Bắt đầu tự động huấn luyện lại model (Fine-tuning)...
+[THERMAL] INFO:     127.0.0.1:33218 - "POST /api/config/update?forward=false HTTP/1.1" 200 OK
+[SENDER] [SENDER SUCCESS] Đã đồng bộ targets thành công về local receiver.
+[SENDER] [SENDER] Sending data to local receiver: {'timestamp': '2026-06-01 17:17:04', 'points': [{'id': 'Điểm 1', 'temperature': 29.8}, {'id': 'Điểm 10', 'temperature': 30.3}, {'id': 'Điểm 2', 'temperature': 30.4}, {'id': 'Điểm 3', 'temperature': 30.3}, {'id': 'Điểm 4', 'temperature': 30.6}, {'id': 'Điểm 5', 'temperature': 30.4}, {'id': 'Điểm 6', 'temperature': 30.0}, {'id': 'Điểm 7', 'temperature': 29.6}, {'id': 'Điểm 8', 'temperature': 30.0}, {'id': 'Điểm 9', 'temperature': 30.0}]}
+[THERMAL] /home/admin-khai/Desktop/smart_camera_edge_system/timeseries_service/thermal_receiver.py:271: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+[THERMAL] _cached_predictions_df = pd.concat([_cached_predictions_df, row_df], ignore_index=True)
+[THERMAL] === NHẬN DỮ LIỆU THÀNH CÔNG ===
+[THERMAL] {
+[THERMAL] "timestamp": "2026-06-01 17:17:04",
+[THERMAL] "points": [
+[THERMAL] {
+[THERMAL] "id": "Điểm 1",
+[THERMAL] "temperature": 29.8
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 10",
+[THERMAL] "temperature": 30.3
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 2",
+[THERMAL] "temperature": 30.4
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 3",
+[THERMAL] "temperature": 30.3
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 4",
+[THERMAL] "temperature": 30.6
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 5",
+[THERMAL] "temperature": 30.4
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 6",
+[THERMAL] "temperature": 30.0
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 7",
+[THERMAL] "temperature": 29.6
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 8",
+[THERMAL] "temperature": 30.0
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 9",
+[THERMAL] "temperature": 30.0
+[THERMAL] }
+[THERMAL] ]
+[THERMAL] }
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 1. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 10. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 8. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 9. Tự động thêm vào danh sách xử lý.
+[THERMAL] Dữ liệu hiện có: 1 dòng trong lịch sử. Active: ['Điểm 1', 'Điểm 10', 'Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Điểm 8', 'Điểm 9']
+[THERMAL] Dự đoán thành công!
+[THERMAL] Đang gửi dự đoán tới http://192.168.10.102:8100/api/prediction...
+[THERMAL] Gửi thành công tới http://192.168.10.102:8100/api/prediction
+[THERMAL] Đã lưu history: 1 dòng
+[THERMAL] Chưa có prediction cũ đến hạn để so sánh
+[THERMAL] Trạng thái dự đoán mới: created
+[THERMAL] {
+[THERMAL] "issued_at": "2026-06-01 17:17:04",
+[THERMAL] "input_timestamp": "1970-01-01 00:00:00",
+[THERMAL] "forecast_timestamp": "1970-01-01 00:05:00",
+[THERMAL] "Điểm 1_pred": 30.0,
+[THERMAL] "Điểm 10_pred": 30.0,
+[THERMAL] "Điểm 2_pred": 30.6,
+[THERMAL] "Điểm 3_pred": 30.4,
+[THERMAL] "Điểm 4_pred": 30.0,
+[THERMAL] "Điểm 5_pred": 29.6,
+[THERMAL] "Điểm 6_pred": 30.0,
+[THERMAL] "Điểm 7_pred": 30.0,
+[THERMAL] "Điểm 8_pred": 30.0,
+[THERMAL] "Điểm 9_pred": 30.0
+[THERMAL] }
+[THERMAL] INFO:     127.0.0.1:33232 - "POST /api/thermal-data HTTP/1.1" 200 OK
+[SENDER] [SENDER SUCCESS] Local receiver processed successfully: {"success":true,"message":"Đã nhận dữ liệu nhiệt","received_at":"2026-06-01 17:17:04","actual_row":{"Timestamp":"2026-06-01 17:17:04","Điểm 1":29.8,"Điểm 10":30.3,"Điểm 2":30.4,"Điểm 3":30.3,"Điểm 4":30.6,"Điểm 5":30.4,"Điểm 6":30.0,"Điểm 7":29.6,"Điểm 8":30.0,"Điểm 9":30.0,"Vùng 1":null},"history_rows":1,"evaluation":null,"prediction_status":"created","prediction":{"issued_at":"2026-06-01 17:17:04","input_timestamp":"1970-01-01 00:00:00","forecast_timestamp":"1970-01-01 00:05:00","Điểm 1_pred":30.0,"Điểm 10_pred":30.0,"Điểm 2_pred":30.6,"Điểm 3_pred":30.4,"Điểm 4_pred":30.0,"Điểm 5_pred":29.6,"Điểm 6_pred":30.0,"Điểm 7_pred":30.0,"Điểm 8_pred":30.0,"Điểm 9_pred":30.0},"prediction_callback":{"sent":true,"status_code":200,"response":"{\"success\":true,\"saved\":6,\"legacy_saved\":0}"}}
+[SENDER] [SENDER] Sending data to central server: {'timestamp': '2026-06-01 17:17:04', 'points': [{'id': 'Điểm 1', 'temperature': 29.8}, {'id': 'Điểm 10', 'temperature': 30.3}, {'id': 'Điểm 2', 'temperature': 30.4}, {'id': 'Điểm 3', 'temperature': 30.3}, {'id': 'Điểm 4', 'temperature': 30.6}, {'id': 'Điểm 5', 'temperature': 30.4}, {'id': 'Điểm 6', 'temperature': 30.0}, {'id': 'Điểm 7', 'temperature': 29.6}, {'id': 'Điểm 8', 'temperature': 30.0}, {'id': 'Điểm 9', 'temperature': 30.0}]}
+[SENDER] [SENDER SUCCESS] Central server response: {"success":true,"timestamp":"2026-06-01 17:17:04","targets_received":["Điểm 2","Điểm 3","Điểm 4","Điểm 5","Điểm 6","Điểm 7","Vùng 1"],"prediction":null}
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN-LOG] HUẤN LUYỆN LẠI MODEL DỰ BÁO NHIỆT ĐỘ (RETRAIN)
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN-LOG] [CONFIG] Window Size: 5 | Horizon: 5
+[THERMAL] [AUTOTRAIN-LOG] [CONFIG] Targets (11): ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1', 'Điểm 1', 'Điểm 10', 'Điểm 8', 'Điểm 9']
+[THERMAL] [AUTOTRAIN-LOG] [DATA] Đọc thành công 1 dòng dữ liệu từ data/live_thermal_history.csv
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-LR] Bắt đầu huấn luyện Linear Regression cho các nhãn mới...
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-LR WARNING] Dữ liệu lịch sử hiện tại (1 dòng) ít hơn mức tối thiểu (10 dòng) để huấn luyện Linear Regression. Sử dụng chế độ Extrapolation tuyến tính tự động lúc dự đoán.
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-MTKAN WARNING] Chưa đủ 100 dòng dữ liệu lịch sử để kích hoạt huấn luyện lại MTKAN.
+[THERMAL] [AUTOTRAIN-LOG] [SUCCESS] Tiến trình huấn luyện hoàn thành tốt đẹp!
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN] Đã hoàn thành tự động huấn luyện lại model. Exit code: 0
+[SENDER] [SENDER WARNING] Không thể tự động đồng bộ cấu hình từ Server: HTTPConnectionPool(host='192.168.10.102', port=8100): Read timed out. (read timeout=3.0)
+[SENDER] [SENDER] Sending data to local receiver: {'timestamp': '2026-06-01 17:17:38', 'points': [{'id': 'Điểm 1', 'temperature': 30.0}, {'id': 'Điểm 10', 'temperature': 30.4}, {'id': 'Điểm 2', 'temperature': 29.6}, {'id': 'Điểm 3', 'temperature': 30.1}, {'id': 'Điểm 4', 'temperature': 30.1}, {'id': 'Điểm 5', 'temperature': 29.9}, {'id': 'Điểm 6', 'temperature': 29.7}, {'id': 'Điểm 7', 'temperature': 29.3}, {'id': 'Điểm 8', 'temperature': 29.4}, {'id': 'Điểm 9', 'temperature': 30.3}]}
+[THERMAL] === NHẬN DỮ LIỆU THÀNH CÔNG ===
+[THERMAL] {
+[THERMAL] "timestamp": "2026-06-01 17:17:28",
+[THERMAL] "points": [
+[THERMAL] {
+[THERMAL] "id": "P2",
+[THERMAL] "temperature": 29.639118194580078
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "P3",
+[THERMAL] "temperature": 29.931577682495117
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "P4",
+[THERMAL] "temperature": 30.077808380126953
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "P5",
+[THERMAL] "temperature": 29.639118194580078
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "P6",
+[THERMAL] "temperature": 30.077808380126953
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "P7",
+[THERMAL] "temperature": 30.370267868041992
+[THERMAL] }
+[THERMAL] ]
+[THERMAL] }
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: P2. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: P3. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: P4. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: P5. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: P6. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: P7. Tự động thêm vào danh sách xử lý.
+[THERMAL] Dữ liệu hiện có: 2 dòng trong lịch sử. Active: ['P2', 'P3', 'P4', 'P5', 'P6', 'P7']
+[THERMAL] Dự đoán thành công!
+[THERMAL] Đang gửi dự đoán tới http://192.168.10.102:8100/api/prediction...
+[THERMAL] [CALLBACK] Lần thử 1/3 tới http://192.168.10.102:8100/api/prediction thất bại: timed out
+[THERMAL] [CALLBACK] Lần thử 2/3 tới http://192.168.10.102:8100/api/prediction thất bại: timed out
+[THERMAL] [CALLBACK] Lần thử 3/3 tới http://192.168.10.102:8100/api/prediction thất bại: timed out
+[THERMAL] Gửi thất bại tới http://192.168.10.102:8100/api/prediction: timed out
+[THERMAL] Đã lưu history: 2 dòng
+[THERMAL] Chưa có prediction cũ đến hạn để so sánh
+[THERMAL] Trạng thái dự đoán mới: created
+[THERMAL] {
+[THERMAL] "issued_at": "2026-06-01 17:17:28",
+[THERMAL] "input_timestamp": "2026-06-01 17:17:28",
+[THERMAL] "forecast_timestamp": "2026-06-01 17:22:28",
+[THERMAL] "P2_pred": 29.639118194580078,
+[THERMAL] "P3_pred": 29.931577682495117,
+[THERMAL] "P4_pred": 30.077808380126953,
+[THERMAL] "P5_pred": 29.639118194580078,
+[THERMAL] "P6_pred": 30.077808380126953,
+[THERMAL] "P7_pred": 30.370267868041992
+[THERMAL] }
+[THERMAL] INFO:     192.168.10.102:37654 - "POST /api/thermal-data HTTP/1.1" 200 OK
+[THERMAL] [CONFIG] Đã nhận và lưu cấu hình điểm đo nhiệt mới vào: data/thermal_points.json
+[THERMAL] [CONFIG] Forwarding config/thermal to central server: http://192.168.10.102:8100/config/thermal
+[THERMAL] [CONFIG] Da reload cấu hình. Targets mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1'] | ID Map: {}
+[THERMAL] [CONFIG] Đã tự động đồng bộ targets từ points mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1']. Kích hoạt Retrain...
+[THERMAL] [AUTOTRAIN] Bắt đầu tự động huấn luyện lại model (Fine-tuning)...
+[THERMAL] INFO:     192.168.10.102:43050 - "POST /config/thermal HTTP/1.1" 200 OK
+[THERMAL] /home/admin-khai/Desktop/smart_camera_edge_system/timeseries_service/thermal_receiver.py:271: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+[THERMAL] _cached_predictions_df = pd.concat([_cached_predictions_df, row_df], ignore_index=True)
+[THERMAL] === NHẬN DỮ LIỆU THÀNH CÔNG ===
+[THERMAL] {
+[THERMAL] "timestamp": "2026-06-01 17:17:38",
+[THERMAL] "points": [
+[THERMAL] {
+[THERMAL] "id": "Điểm 1",
+[THERMAL] "temperature": 30.0
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 10",
+[THERMAL] "temperature": 30.4
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 2",
+[THERMAL] "temperature": 29.6
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 3",
+[THERMAL] "temperature": 30.1
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 4",
+[THERMAL] "temperature": 30.1
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 5",
+[THERMAL] "temperature": 29.9
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 6",
+[THERMAL] "temperature": 29.7
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 7",
+[THERMAL] "temperature": 29.3
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 8",
+[THERMAL] "temperature": 29.4
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 9",
+[THERMAL] "temperature": 30.3
+[THERMAL] }
+[THERMAL] ]
+[THERMAL] }
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 1. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 10. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 8. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 9. Tự động thêm vào danh sách xử lý.
+[THERMAL] Dữ liệu hiện có: 1 dòng trong lịch sử. Active: ['Điểm 1', 'Điểm 10', 'Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Điểm 8', 'Điểm 9']
+[THERMAL] Dự đoán thành công!
+[THERMAL] Đang gửi dự đoán tới http://192.168.10.102:8100/api/prediction...
+[THERMAL] Gửi thành công tới http://192.168.10.102:8100/api/prediction
+[THERMAL] Đã lưu history: 1 dòng
+[THERMAL] Chưa có prediction cũ đến hạn để so sánh
+[THERMAL] Trạng thái dự đoán mới: created
+[THERMAL] {
+[THERMAL] "issued_at": "2026-06-01 17:17:48",
+[THERMAL] "input_timestamp": "1970-01-01 00:00:00",
+[THERMAL] "forecast_timestamp": "1970-01-01 00:05:00",
+[THERMAL] "Điểm 1_pred": 30.0,
+[THERMAL] "Điểm 10_pred": 30.0,
+[THERMAL] "Điểm 2_pred": 30.1,
+[THERMAL] "Điểm 3_pred": 29.9,
+[THERMAL] "Điểm 4_pred": 29.7,
+[THERMAL] "Điểm 5_pred": 29.3,
+[THERMAL] "Điểm 6_pred": 29.4,
+[THERMAL] "Điểm 7_pred": 30.3,
+[THERMAL] "Điểm 8_pred": 30.0,
+[THERMAL] "Điểm 9_pred": 30.0
+[THERMAL] }
+[THERMAL] INFO:     127.0.0.1:59092 - "POST /api/thermal-data HTTP/1.1" 200 OK
+[SENDER] [SENDER SUCCESS] Local receiver processed successfully: {"success":true,"message":"Đã nhận dữ liệu nhiệt","received_at":"2026-06-01 17:17:48","actual_row":{"Timestamp":"2026-06-01 17:17:38","Điểm 1":30.0,"Điểm 10":30.4,"Điểm 2":29.6,"Điểm 3":30.1,"Điểm 4":30.1,"Điểm 5":29.9,"Điểm 6":29.7,"Điểm 7":29.3,"Điểm 8":29.4,"Điểm 9":30.3,"Vùng 1":null},"history_rows":1,"evaluation":null,"prediction_status":"created","prediction":{"issued_at":"2026-06-01 17:17:48","input_timestamp":"1970-01-01 00:00:00","forecast_timestamp":"1970-01-01 00:05:00","Điểm 1_pred":30.0,"Điểm 10_pred":30.0,"Điểm 2_pred":30.1,"Điểm 3_pred":29.9,"Điểm 4_pred":29.7,"Điểm 5_pred":29.3,"Điểm 6_pred":29.4,"Điểm 7_pred":30.3,"Điểm 8_pred":30.0,"Điểm 9_pred":30.0},"prediction_callback":{"sent":true,"status_code":200,"response":"{\"success\":true,\"saved\":6,\"legacy_saved\":0}"}}
+[SENDER] [SENDER] Sending data to central server: {'timestamp': '2026-06-01 17:17:38', 'points': [{'id': 'Điểm 1', 'temperature': 30.0}, {'id': 'Điểm 10', 'temperature': 30.4}, {'id': 'Điểm 2', 'temperature': 29.6}, {'id': 'Điểm 3', 'temperature': 30.1}, {'id': 'Điểm 4', 'temperature': 30.1}, {'id': 'Điểm 5', 'temperature': 29.9}, {'id': 'Điểm 6', 'temperature': 29.7}, {'id': 'Điểm 7', 'temperature': 29.3}, {'id': 'Điểm 8', 'temperature': 29.4}, {'id': 'Điểm 9', 'temperature': 30.3}]}
+[SENDER] [SENDER SUCCESS] Central server response: {"success":true,"timestamp":"2026-06-01 17:17:38","targets_received":["Điểm 2","Điểm 3","Điểm 4","Điểm 5","Điểm 6","Điểm 7","Vùng 1"],"prediction":null}
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN-LOG] HUẤN LUYỆN LẠI MODEL DỰ BÁO NHIỆT ĐỘ (RETRAIN)
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN-LOG] [CONFIG] Window Size: 5 | Horizon: 5
+[THERMAL] [AUTOTRAIN-LOG] [CONFIG] Targets (11): ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1', 'Điểm 1', 'Điểm 10', 'Điểm 8', 'Điểm 9']
+[THERMAL] [AUTOTRAIN-LOG] [DATA] Đọc thành công 1 dòng dữ liệu từ data/live_thermal_history.csv
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-LR] Bắt đầu huấn luyện Linear Regression cho các nhãn mới...
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-LR WARNING] Dữ liệu lịch sử hiện tại (1 dòng) ít hơn mức tối thiểu (10 dòng) để huấn luyện Linear Regression. Sử dụng chế độ Extrapolation tuyến tính tự động lúc dự đoán.
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-MTKAN WARNING] Chưa đủ 100 dòng dữ liệu lịch sử để kích hoạt huấn luyện lại MTKAN.
+[THERMAL] [AUTOTRAIN-LOG] [SUCCESS] Tiến trình huấn luyện hoàn thành tốt đẹp!
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN] Đã hoàn thành tự động huấn luyện lại model. Exit code: 0
+[SENDER] [SENDER] Phát hiện danh sách targets thay đổi trên Server: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1']. Đang đồng bộ về local...
+[THERMAL] [CONFIG] Da reload cấu hình. Targets mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1'] | ID Map: {}
+[THERMAL] [CONFIG] Đã cập nhật targets dự báo mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1']. Làm sạch dữ liệu cũ và kích hoạt Retrain...
+[THERMAL] [AUTOTRAIN] Bắt đầu tự động huấn luyện lại model (Fine-tuning)...
+[THERMAL] INFO:     127.0.0.1:40012 - "POST /api/config/update?forward=false HTTP/1.1" 200 OK
+[SENDER] [SENDER SUCCESS] Đã đồng bộ targets thành công về local receiver.
+[SENDER] [SENDER] Sending data to local receiver: {'timestamp': '2026-06-01 17:18:19', 'points': [{'id': 'Điểm 1', 'temperature': 30.7}, {'id': 'Điểm 10', 'temperature': 30.6}, {'id': 'Điểm 2', 'temperature': 30.6}, {'id': 'Điểm 3', 'temperature': 30.1}, {'id': 'Điểm 4', 'temperature': 30.8}, {'id': 'Điểm 5', 'temperature': 30.0}, {'id': 'Điểm 6', 'temperature': 30.1}, {'id': 'Điểm 7', 'temperature': 30.3}, {'id': 'Điểm 8', 'temperature': 30.0}, {'id': 'Điểm 9', 'temperature': 29.6}]}
+[THERMAL] /home/admin-khai/Desktop/smart_camera_edge_system/timeseries_service/thermal_receiver.py:271: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+[THERMAL] _cached_predictions_df = pd.concat([_cached_predictions_df, row_df], ignore_index=True)
+[THERMAL] === NHẬN DỮ LIỆU THÀNH CÔNG ===
+[THERMAL] {
+[THERMAL] "timestamp": "2026-06-01 17:18:19",
+[THERMAL] "points": [
+[THERMAL] {
+[THERMAL] "id": "Điểm 1",
+[THERMAL] "temperature": 30.7
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 10",
+[THERMAL] "temperature": 30.6
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 2",
+[THERMAL] "temperature": 30.6
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 3",
+[THERMAL] "temperature": 30.1
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 4",
+[THERMAL] "temperature": 30.8
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 5",
+[THERMAL] "temperature": 30.0
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 6",
+[THERMAL] "temperature": 30.1
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 7",
+[THERMAL] "temperature": 30.3
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 8",
+[THERMAL] "temperature": 30.0
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 9",
+[THERMAL] "temperature": 29.6
+[THERMAL] }
+[THERMAL] ]
+[THERMAL] }
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 1. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 10. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 8. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: Điểm 9. Tự động thêm vào danh sách xử lý.
+[THERMAL] Dữ liệu hiện có: 1 dòng trong lịch sử. Active: ['Điểm 1', 'Điểm 10', 'Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Điểm 8', 'Điểm 9']
+[THERMAL] Dự đoán thành công!
+[THERMAL] Đang gửi dự đoán tới http://192.168.10.102:8100/api/prediction...
+[THERMAL] Gửi thành công tới http://192.168.10.102:8100/api/prediction
+[THERMAL] Đã lưu history: 1 dòng
+[THERMAL] Chưa có prediction cũ đến hạn để so sánh
+[THERMAL] Trạng thái dự đoán mới: created
+[THERMAL] {
+[THERMAL] "issued_at": "2026-06-01 17:18:19",
+[THERMAL] "input_timestamp": "1970-01-01 00:00:00",
+[THERMAL] "forecast_timestamp": "1970-01-01 00:05:00",
+[THERMAL] "Điểm 1_pred": 30.0,
+[THERMAL] "Điểm 10_pred": 30.0,
+[THERMAL] "Điểm 2_pred": 30.8,
+[THERMAL] "Điểm 3_pred": 30.0,
+[THERMAL] "Điểm 4_pred": 30.1,
+[THERMAL] "Điểm 5_pred": 30.3,
+[THERMAL] "Điểm 6_pred": 30.0,
+[THERMAL] "Điểm 7_pred": 29.6,
+[THERMAL] "Điểm 8_pred": 30.0,
+[THERMAL] "Điểm 9_pred": 30.0
+[THERMAL] }
+[THERMAL] INFO:     127.0.0.1:40014 - "POST /api/thermal-data HTTP/1.1" 200 OK
+[SENDER] [SENDER SUCCESS] Local receiver processed successfully: {"success":true,"message":"Đã nhận dữ liệu nhiệt","received_at":"2026-06-01 17:18:19","actual_row":{"Timestamp":"2026-06-01 17:18:19","Điểm 1":30.7,"Điểm 10":30.6,"Điểm 2":30.6,"Điểm 3":30.1,"Điểm 4":30.8,"Điểm 5":30.0,"Điểm 6":30.1,"Điểm 7":30.3,"Điểm 8":30.0,"Điểm 9":29.6,"Vùng 1":null},"history_rows":1,"evaluation":null,"prediction_status":"created","prediction":{"issued_at":"2026-06-01 17:18:19","input_timestamp":"1970-01-01 00:00:00","forecast_timestamp":"1970-01-01 00:05:00","Điểm 1_pred":30.0,"Điểm 10_pred":30.0,"Điểm 2_pred":30.8,"Điểm 3_pred":30.0,"Điểm 4_pred":30.1,"Điểm 5_pred":30.3,"Điểm 6_pred":30.0,"Điểm 7_pred":29.6,"Điểm 8_pred":30.0,"Điểm 9_pred":30.0},"prediction_callback":{"sent":true,"status_code":200,"response":"{\"success\":true,\"saved\":6,\"legacy_saved\":0}"}}
+[SENDER] [SENDER] Sending data to central server: {'timestamp': '2026-06-01 17:18:19', 'points': [{'id': 'Điểm 1', 'temperature': 30.7}, {'id': 'Điểm 10', 'temperature': 30.6}, {'id': 'Điểm 2', 'temperature': 30.6}, {'id': 'Điểm 3', 'temperature': 30.1}, {'id': 'Điểm 4', 'temperature': 30.8}, {'id': 'Điểm 5', 'temperature': 30.0}, {'id': 'Điểm 6', 'temperature': 30.1}, {'id': 'Điểm 7', 'temperature': 30.3}, {'id': 'Điểm 8', 'temperature': 30.0}, {'id': 'Điểm 9', 'temperature': 29.6}]}
+[SENDER] [SENDER SUCCESS] Central server response: {"success":true,"timestamp":"2026-06-01 17:18:19","targets_received":["Điểm 2","Điểm 3","Điểm 4","Điểm 5","Điểm 6","Điểm 7","Vùng 1"],"prediction":null}
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN-LOG] HUẤN LUYỆN LẠI MODEL DỰ BÁO NHIỆT ĐỘ (RETRAIN)
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN-LOG] [CONFIG] Window Size: 5 | Horizon: 5
+[THERMAL] [AUTOTRAIN-LOG] [CONFIG] Targets (11): ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1', 'Điểm 1', 'Điểm 10', 'Điểm 8', 'Điểm 9']
+[THERMAL] [AUTOTRAIN-LOG] [DATA] Đọc thành công 1 dòng dữ liệu từ data/live_thermal_history.csv
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-LR] Bắt đầu huấn luyện Linear Regression cho các nhãn mới...
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-LR WARNING] Dữ liệu lịch sử hiện tại (1 dòng) ít hơn mức tối thiểu (10 dòng) để huấn luyện Linear Regression. Sử dụng chế độ Extrapolation tuyến tính tự động lúc dự đoán.
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-MTKAN WARNING] Chưa đủ 100 dòng dữ liệu lịch sử để kích hoạt huấn luyện lại MTKAN.
+[THERMAL] [AUTOTRAIN-LOG] [SUCCESS] Tiến trình huấn luyện hoàn thành tốt đẹp!
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN] Đã hoàn thành tự động huấn luyện lại model. Exit code: 0
+[SENDER] [SENDER WARNING] Không thể tự động đồng bộ cấu hình từ Server: HTTPConnectionPool(host='192.168.10.102', port=8100): Max retries exceeded with url: /api/config (Caused by NewConnectionError("HTTPConnection(host='192.168.10.102', port=8100): Failed to establish a new connection: [Errno 111] Connection refused"))
+[SENDER] [SENDER] Sending data to local receiver: {'timestamp': '2026-06-01 17:18:50', 'points': [{'id': 'Điểm 1', 'temperature': 30.2}, {'id': 'Điểm 10', 'temperature': 30.3}, {'id': 'Điểm 2', 'temperature': 30.0}, {'id': 'Điểm 3', 'temperature': 30.4}, {'id': 'Điểm 4', 'temperature': 30.4}, {'id': 'Điểm 5', 'temperature': 29.9}, {'id': 'Điểm 6', 'temperature': 30.1}, {'id': 'Điểm 7', 'temperature': 29.9}, {'id': 'Điểm 8', 'temperature': 30.3}, {'id': 'Điểm 9', 'temperature': 30.1}]}
+[THERMAL] === NHẬN DỮ LIỆU THÀNH CÔNG ===
+[THERMAL] {
+[THERMAL] "timestamp": "2026-06-01 17:18:50",
+[THERMAL] "points": [
+[THERMAL] {
+[THERMAL] "id": "Điểm 1",
+[THERMAL] "temperature": 30.2
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 10",
+[THERMAL] "temperature": 30.3
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 2",
+[THERMAL] "temperature": 30.0
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 3",
+[THERMAL] "temperature": 30.4
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 4",
+[THERMAL] "temperature": 30.4
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 5",
+[THERMAL] "temperature": 29.9
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 6",
+[THERMAL] "temperature": 30.1
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 7",
+[THERMAL] "temperature": 29.9
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 8",
+[THERMAL] "temperature": 30.3
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "Điểm 9",
+[THERMAL] "temperature": 30.1
+[THERMAL] }
+[THERMAL] ]
+[THERMAL] }
+[THERMAL] Dữ liệu hiện có: 2 dòng trong lịch sử. Active: ['Điểm 1', 'Điểm 10', 'Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Điểm 8', 'Điểm 9']
+[THERMAL] Dự đoán thành công!
+[THERMAL] Đang gửi dự đoán tới http://192.168.10.102:8100/api/prediction...
+[THERMAL] [CALLBACK] Lần thử 1/3 tới http://192.168.10.102:8100/api/prediction thất bại: [Errno 111] Connection refused
+[THERMAL] [CALLBACK] Lần thử 2/3 tới http://192.168.10.102:8100/api/prediction thất bại: [Errno 111] Connection refused
+[THERMAL] [CALLBACK] Lần thử 3/3 tới http://192.168.10.102:8100/api/prediction thất bại: [Errno 111] Connection refused
+[THERMAL] Gửi thất bại tới http://192.168.10.102:8100/api/prediction: [Errno 111] Connection refused
+[THERMAL] Đã lưu history: 2 dòng
+[THERMAL] Chưa có prediction cũ đến hạn để so sánh
+[THERMAL] Trạng thái dự đoán mới: created
+[THERMAL] {
+[THERMAL] "issued_at": "2026-06-01 17:18:50",
+[THERMAL] "input_timestamp": "2026-06-01 17:18:50",
+[THERMAL] "forecast_timestamp": "2026-06-01 17:23:50",
+[THERMAL] "Điểm 1_pred": 30.2,
+[THERMAL] "Điểm 10_pred": 30.3,
+[THERMAL] "Điểm 2_pred": 30.0,
+[THERMAL] "Điểm 3_pred": 30.4,
+[THERMAL] "Điểm 4_pred": 30.4,
+[THERMAL] "Điểm 5_pred": 29.9,
+[THERMAL] "Điểm 6_pred": 30.1,
+[THERMAL] "Điểm 7_pred": 29.9,
+[THERMAL] "Điểm 8_pred": 30.3,
+[THERMAL] "Điểm 9_pred": 30.1
+[THERMAL] }
+[THERMAL] INFO:     127.0.0.1:43242 - "POST /api/thermal-data HTTP/1.1" 200 OK
+[SENDER] [SENDER SUCCESS] Local receiver processed successfully: {"success":true,"message":"Đã nhận dữ liệu nhiệt","received_at":"2026-06-01 17:18:52","actual_row":{"Timestamp":"2026-06-01 17:18:50","Điểm 1":30.2,"Điểm 10":30.3,"Điểm 2":30.0,"Điểm 3":30.4,"Điểm 4":30.4,"Điểm 5":29.9,"Điểm 6":30.1,"Điểm 7":29.9,"Điểm 8":30.3,"Điểm 9":30.1,"Vùng 1":null},"history_rows":2,"evaluation":null,"prediction_status":"created","prediction":{"issued_at":"2026-06-01 17:18:50","input_timestamp":"2026-06-01 17:18:50","forecast_timestamp":"2026-06-01 17:23:50","Điểm 1_pred":30.2,"Điểm 10_pred":30.3,"Điểm 2_pred":30.0,"Điểm 3_pred":30.4,"Điểm 4_pred":30.4,"Điểm 5_pred":29.9,"Điểm 6_pred":30.1,"Điểm 7_pred":29.9,"Điểm 8_pred":30.3,"Điểm 9_pred":30.1},"prediction_callback":{"sent":false,"error":"[Errno 111] Connection refused"}}
+[SENDER] [SENDER] Sending data to central server: {'timestamp': '2026-06-01 17:18:50', 'points': [{'id': 'Điểm 1', 'temperature': 30.2}, {'id': 'Điểm 10', 'temperature': 30.3}, {'id': 'Điểm 2', 'temperature': 30.0}, {'id': 'Điểm 3', 'temperature': 30.4}, {'id': 'Điểm 4', 'temperature': 30.4}, {'id': 'Điểm 5', 'temperature': 29.9}, {'id': 'Điểm 6', 'temperature': 30.1}, {'id': 'Điểm 7', 'temperature': 29.9}, {'id': 'Điểm 8', 'temperature': 30.3}, {'id': 'Điểm 9', 'temperature': 30.1}]}
+[SENDER] [SENDER ERROR] Failed to send to central server: HTTPConnectionPool(host='192.168.10.102', port=8100): Max retries exceeded with url: /api/thermal-data (Caused by NewConnectionError("HTTPConnection(host='192.168.10.102', port=8100): Failed to establish a new connection: [Errno 111] Connection refused"))
+[THERMAL] /home/admin-khai/Desktop/smart_camera_edge_system/timeseries_service/thermal_receiver.py:146: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+[THERMAL] _cached_history_df = pd.concat([_cached_history_df, row_df], ignore_index=True)
+[THERMAL] === NHẬN DỮ LIỆU THÀNH CÔNG ===
+[THERMAL] {
+[THERMAL] "timestamp": "2026-06-01 17:18:54",
+[THERMAL] "points": [
+[THERMAL] {
+[THERMAL] "id": "P2",
+[THERMAL] "temperature": 30.084447860717773
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "P3",
+[THERMAL] "temperature": 30.084447860717773
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "P4",
+[THERMAL] "temperature": 29.938207626342773
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "P5",
+[THERMAL] "temperature": 29.64572525024414
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "P6",
+[THERMAL] "temperature": 29.938207626342773
+[THERMAL] },
+[THERMAL] {
+[THERMAL] "id": "P7",
+[THERMAL] "temperature": 29.64572525024414
+[THERMAL] }
+[THERMAL] ]
+[THERMAL] }
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: P2. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: P3. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: P4. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: P5. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: P6. Tự động thêm vào danh sách xử lý.
+[THERMAL] [DYNAMIC] Phát hiện điểm mới: P7. Tự động thêm vào danh sách xử lý.
+[THERMAL] Dữ liệu hiện có: 3 dòng trong lịch sử. Active: ['P2', 'P3', 'P4', 'P5', 'P6', 'P7']
+[THERMAL] Dự đoán thành công!
+[THERMAL] Đang gửi dự đoán tới http://192.168.10.102:8100/api/prediction...
+[THERMAL] [CALLBACK] Lần thử 1/3 tới http://192.168.10.102:8100/api/prediction thất bại: [Errno 111] Connection refused
+[THERMAL] [CALLBACK] Lần thử 2/3 tới http://192.168.10.102:8100/api/prediction thất bại: [Errno 111] Connection refused
+[THERMAL] [CALLBACK] Lần thử 3/3 tới http://192.168.10.102:8100/api/prediction thất bại: [Errno 111] Connection refused
+[THERMAL] Gửi thất bại tới http://192.168.10.102:8100/api/prediction: [Errno 111] Connection refused
+[THERMAL] Đã lưu history: 3 dòng
+[THERMAL] Chưa có prediction cũ đến hạn để so sánh
+[THERMAL] Trạng thái dự đoán mới: created
+[THERMAL] {
+[THERMAL] "issued_at": "2026-06-01 17:18:54",
+[THERMAL] "input_timestamp": "2026-06-01 17:18:54",
+[THERMAL] "forecast_timestamp": "2026-06-01 17:23:54",
+[THERMAL] "P2_pred": 30.084447860717773,
+[THERMAL] "P3_pred": 30.084447860717773,
+[THERMAL] "P4_pred": 29.938207626342773,
+[THERMAL] "P5_pred": 29.64572525024414,
+[THERMAL] "P6_pred": 29.938207626342773,
+[THERMAL] "P7_pred": 29.64572525024414
+[THERMAL] }
+[THERMAL] INFO:     192.168.10.102:43676 - "POST /api/thermal-data HTTP/1.1" 200 OK
+[THERMAL] [CONFIG] Đã nhận và lưu cấu hình điểm đo nhiệt mới vào: data/thermal_points.json
+[THERMAL] [CONFIG] Forwarding config/thermal to central server: http://192.168.10.102:8100/config/thermal
+[THERMAL] [CONFIG-ERROR] Failed to forward config/thermal to central server: HTTPConnectionPool(host='192.168.10.102', port=8100): Max retries exceeded with url: /config/thermal (Caused by NewConnectionError("HTTPConnection(host='192.168.10.102', port=8100): Failed to establish a new connection: [Errno 111] Connection refused"))
+[THERMAL] [CONFIG] Da reload cấu hình. Targets mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1'] | ID Map: {}
+[THERMAL] [CONFIG] Đã tự động đồng bộ targets từ points mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1']. Kích hoạt Retrain...
+[THERMAL] [AUTOTRAIN] Bắt đầu tự động huấn luyện lại model (Fine-tuning)...
+[THERMAL] INFO:     192.168.10.102:43682 - "POST /config/thermal HTTP/1.1" 200 OK
+[THERMAL] [CONFIG] Đã nhận và lưu cấu hình điểm đo nhiệt mới vào: data/thermal_points.json
+[THERMAL] [CONFIG] Forwarding config/thermal to central server: http://192.168.10.102:8100/config/thermal
+[THERMAL] [CONFIG-ERROR] Failed to forward config/thermal to central server: HTTPConnectionPool(host='192.168.10.102', port=8100): Max retries exceeded with url: /config/thermal (Caused by NewConnectionError("HTTPConnection(host='192.168.10.102', port=8100): Failed to establish a new connection: [Errno 111] Connection refused"))
+[THERMAL] [CONFIG] Da reload cấu hình. Targets mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1'] | ID Map: {}
+[THERMAL] [CONFIG] Đã tự động đồng bộ targets từ points mới: ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1']. Kích hoạt Retrain...
+[THERMAL] [AUTOTRAIN] Một tiến trình huấn luyện đang chạy, bỏ qua kích hoạt trùng lặp.
+[THERMAL] INFO:     192.168.10.102:49016 - "POST /config/thermal HTTP/1.1" 200 OK
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN-LOG] HUẤN LUYỆN LẠI MODEL DỰ BÁO NHIỆT ĐỘ (RETRAIN)
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN-LOG] [CONFIG] Window Size: 5 | Horizon: 5
+[THERMAL] [AUTOTRAIN-LOG] [CONFIG] Targets (7): ['Điểm 2', 'Điểm 3', 'Điểm 4', 'Điểm 5', 'Điểm 6', 'Điểm 7', 'Vùng 1']
+[THERMAL] [AUTOTRAIN-LOG] [DATA] Đọc thành công 0 dòng dữ liệu từ data/live_thermal_history.csv
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-LR] Bắt đầu huấn luyện Linear Regression cho các nhãn mới...
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-LR WARNING] Dữ liệu lịch sử hiện tại (0 dòng) ít hơn mức tối thiểu (10 dòng) để huấn luyện Linear Regression. Sử dụng chế độ Extrapolation tuyến tính tự động lúc dự đoán.
+[THERMAL] [AUTOTRAIN-LOG] [TRAIN-MTKAN WARNING] Chưa đủ 100 dòng dữ liệu lịch sử để kích hoạt huấn luyện lại MTKAN.
+[THERMAL] [AUTOTRAIN-LOG] [SUCCESS] Tiến trình huấn luyện hoàn thành tốt đẹp!
+[THERMAL] [AUTOTRAIN-LOG] ======================================================================
+[THERMAL] [AUTOTRAIN] Đã hoàn thành tự động huấn luyện lại model. Exit code: 0
+[YOLO] 
+[YOLO] [SYSTEM] Nhan tin hieu dung (signal 15). Dang shutdown he thong...
+[YOLO] [SYSTEM] Da dung tat ca tien trinh thanh cong.
+[CẢNH BÁO] Thermal Receiver đã dừng đột ngột với exit code -9!
+
+[SYSTEM] Nhận tín hiệu tắt từ hệ thống. Đang dừng các tiến trình con...
+[SYSTEM] Đã tắt tất cả các tiến trình con thành công.

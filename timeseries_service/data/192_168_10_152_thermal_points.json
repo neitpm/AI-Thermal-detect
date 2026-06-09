@@ -1,0 +1,59 @@
+{
+    "stream_id": "camera_152_thermal",
+    "device_id": "ae58fb5c-09c4-4f7f-a93e-1817f750d9a9",
+    "camera_ip": "192.168.10.152",
+    "username": "admin",
+    "password": "Demo@2024",
+    "points": [
+        {
+            "id": "Điểm 1",
+            "x": 0.2064,
+            "y": 0.1382,
+            "pre_alarm": 50.0,
+            "alarm": 70.0,
+            "label": "Điểm 1"
+        },
+        {
+            "id": "Điểm 2",
+            "x": 0.7407,
+            "y": 0.1893,
+            "pre_alarm": 50.0,
+            "alarm": 70.0,
+            "label": "Điểm 2"
+        },
+        {
+            "id": "Điểm 3",
+            "x": 0.276,
+            "y": 0.4715,
+            "pre_alarm": 30.0,
+            "alarm": 40.0,
+            "label": "Điểm 3"
+        }
+    ],
+    "zones": [
+        {
+            "id": "Vùng 1",
+            "polygon": [
+                [
+                    0.5945,
+                    0.4654
+                ],
+                [
+                    0.7947,
+                    0.4654
+                ],
+                [
+                    0.7947,
+                    0.6883
+                ],
+                [
+                    0.5945,
+                    0.6883
+                ]
+            ],
+            "pre_alarm": 50.0,
+            "alarm": 70.0,
+            "label": "Vùng 1"
+        }
+    ]
+}

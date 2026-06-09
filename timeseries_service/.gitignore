@@ -1,20 +1,20 @@
 __pycache__/
 tf_env/
 .codex
-received_data/
+# received_data/
 .vscode/
 .idea/
 *.pyc
 
 # Ignored data files
-data/*_live_thermal_history.csv
-data/*_live_predictions.csv
-data/*_live_evaluations.csv
-data/*_thermal_points.json
-data/live_thermal_history.csv
-data/live_predictions.csv
-data/live_evaluations.csv
-data/thermal_points.json
+# data/*_live_thermal_history.csv
+# data/*_live_predictions.csv
+# data/*_live_evaluations.csv
+# data/*_thermal_points.json
+# data/live_thermal_history.csv
+# data/live_predictions.csv
+# data/live_evaluations.csv
+# data/thermal_points.json
 
 # Ignored model configs, metrics, metadata, scalers, weights, and LR pkls
 model/*_config.json
