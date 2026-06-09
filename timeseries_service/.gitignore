@@ -17,15 +17,15 @@ tf_env/
 # data/thermal_points.json
 
 # Ignored model configs, metrics, metadata, scalers, weights, and LR pkls
-model/*_config.json
-model/*_training_meta.json
-model/*_linear_reg.pkl
-model/*_scaler_X.pkl
-model/*_scaler_y.pkl
-model/*_mtkan_weights.weights.h5
-model/config.json
-model/training_meta.json
-model/linear_reg.pkl
-model/scaler_X.pkl
-model/scaler_y.pkl
-model/mtkan_weights.weights.h5
+# model/*_config.json
+# model/*_training_meta.json
+# model/*_linear_reg.pkl
+# model/*_scaler_X.pkl
+# model/*_scaler_y.pkl
+# model/*_mtkan_weights.weights.h5
+# model/config.json
+# model/training_meta.json
+# model/linear_reg.pkl
+# model/scaler_X.pkl
+# model/scaler_y.pkl
+# model/mtkan_weights.weights.h5

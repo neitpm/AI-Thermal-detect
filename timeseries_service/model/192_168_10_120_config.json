@@ -1,0 +1,23 @@
+{
+    "window_size": 5,
+    "horizon": 5,
+    "seasonal_period": 60,
+    "targets": [
+        "Điểm 1",
+        "Vùng 1"
+    ],
+    "feature_cols": [
+        "Điểm 1",
+        "Điểm 1_trend",
+        "Điểm 1_seasonal",
+        "Điểm 1_residual",
+        "Vùng 1",
+        "Vùng 1_trend",
+        "Vùng 1_seasonal",
+        "Vùng 1_residual"
+    ],
+    "target_cols": [
+        "Điểm 1_t5",
+        "Vùng 1_t5"
+    ]
+}

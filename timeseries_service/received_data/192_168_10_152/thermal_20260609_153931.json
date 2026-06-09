@@ -1,22 +1,22 @@
 {
     "camera_ip": "192.168.10.152",
-    "timestamp": "2026-06-09 11:29:02",
+    "timestamp": "2026-06-09 15:39:31",
     "points": [
         {
             "id": "Điểm 1",
-            "temperature": 33.92850875854492
+            "temperature": 34.08346939086914
         },
         {
             "id": "Điểm 2",
-            "temperature": 33.77325439453125
+            "temperature": 34.23872375488281
         },
         {
             "id": "Điểm 3",
-            "temperature": 34.549522399902344
+            "temperature": 34.549232482910156
         },
         {
             "id": "Vùng 1",
-            "temperature": 35.43446731567383
+            "temperature": 35.154720306396484
         }
     ]
 }
