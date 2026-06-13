@@ -132,6 +132,11 @@ def main():
             try:
                 scaler_X = joblib.load(scaler_X_path)
                 scaler_y = joblib.load(scaler_y_path)
+                
+                # Kiểm tra xem scaler cũ có khớp kích thước đặc trưng/nhãn mới không
+                if (hasattr(scaler_X, "n_features_in_") and scaler_X.n_features_in_ != len(FEATURE_COLS)) or \
+                   (hasattr(scaler_y, "n_features_in_") and scaler_y.n_features_in_ != len(TARGETS)):
+                    raise ValueError("Scaler shape mismatch due to targets update")
             except Exception:
                 from sklearn.preprocessing import StandardScaler
                 scaler_X = StandardScaler()

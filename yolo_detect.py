@@ -47,7 +47,7 @@ API_MAX_WORKERS = 1
 JPEG_QUALITY = 85
 
 os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = (
-    "rtsp_transport;tcp|max_delay;500000|fflags;nobuffer"
+    "rtsp_transport;tcp|max_delay;500000|fflags;nobuffer|stimeout;5000000"
 )
 
 # =========================
@@ -252,36 +252,60 @@ class FrameReader(threading.Thread):
     def __init__(self, src):
         super().__init__(daemon=True)
         self.src = src
-        self.cap = cv2.VideoCapture(src, cv2.CAP_FFMPEG)
-        self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-        if not self.cap.isOpened():
-            raise RuntimeError(f"Khong mo duoc nguon: {src}")
+        self.cap = None
         self.frame = None
         self.ret = False
         self._lock = threading.Lock()
         self._stop_event = threading.Event()
 
     def run(self):
+        print("[YOLO-READER] Khoi tao camera capture...", flush=True)
+        self.cap = cv2.VideoCapture(self.src, cv2.CAP_FFMPEG)
+        self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        
         consecutive_failures = 0
+        last_success_time = time.time()
+        
         while not self._stop_event.is_set():
-            ret, frame = self.cap.read()
-            if not ret or frame is None:
-                consecutive_failures += 1
-                # Nếu không đọc được hình mới quá 100 lần liên tiếp (tương ứng khoảng 3-5 giây)
-                if consecutive_failures >= 100:
-                    print("[YOLO-READER] Mat ket noi camera. Dang tien hanh ket noi lai...", flush=True)
+            if self.cap is None or not self.cap.isOpened():
+                print("[YOLO-READER] Stream chua duoc mo. Dang thu ket noi...", flush=True)
+                if self.cap is not None:
                     try:
                         self.cap.release()
                     except Exception:
                         pass
+                self.cap = cv2.VideoCapture(self.src, cv2.CAP_FFMPEG)
+                self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+                if not self.cap.isOpened():
                     time.sleep(5)
-                    self.cap = cv2.VideoCapture(self.src, cv2.CAP_FFMPEG)
-                    self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+                    continue
+                else:
+                    print("[YOLO-READER] Da ket noi camera thanh cong!", flush=True)
+                    last_success_time = time.time()
                     consecutive_failures = 0
-                time.sleep(0.03)
+            
+            ret, frame = self.cap.read()
+            if not ret or frame is None:
+                consecutive_failures += 1
+                time_since_last_frame = time.time() - last_success_time
+                # Reconnect if we fail 5 times consecutively or if we haven't received a frame in 10 seconds
+                if consecutive_failures >= 5 or time_since_last_frame > 10.0:
+                    print(f"[YOLO-READER] Mat ket noi camera (failures={consecutive_failures}, silent_time={time_since_last_frame:.1f}s). Dang tien hanh ket noi lai...", flush=True)
+                    try:
+                        self.cap.release()
+                    except Exception:
+                        pass
+                    self.cap = None
+                    with self._lock:
+                        self.ret = False
+                        self.frame = None
+                    time.sleep(3)
+                else:
+                    time.sleep(0.03)
                 continue
             
             consecutive_failures = 0
+            last_success_time = time.time()
             with self._lock:
                 self.ret = ret
                 self.frame = frame
@@ -295,10 +319,11 @@ class FrameReader(threading.Thread):
     def stop(self):
         self._stop_event.set()
         self.join(timeout=2)
-        try:
-            self.cap.release()
-        except Exception:
-            pass
+        if self.cap is not None:
+            try:
+                self.cap.release()
+            except Exception:
+                pass
 
 
 # =========================
