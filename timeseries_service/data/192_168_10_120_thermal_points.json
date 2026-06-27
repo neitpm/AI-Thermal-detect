@@ -12,6 +12,14 @@
             "pre_alarm": 50.0,
             "alarm": 70.0,
             "label": "Điểm 1"
+        },
+        {
+            "id": "Điểm 2",
+            "x": 0.2865,
+            "y": 0.5308,
+            "pre_alarm": 50.0,
+            "alarm": 70.0,
+            "label": "Điểm 2"
         }
     ],
     "zones": [
@@ -35,8 +43,8 @@
                     0.4737
                 ]
             ],
-            "pre_alarm": 50.0,
-            "alarm": 70.0,
+            "pre_alarm": 50,
+            "alarm": 70,
             "label": "Vùng 1"
         }
     ]

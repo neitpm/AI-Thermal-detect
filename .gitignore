@@ -17,17 +17,16 @@ include/
 # *.pt
 
 # Ignore local logs
-# *.log
-# system_all.log
-# system_reactive.log
-# thermal_sender.log
-# thermal_service.log
+*.log
+system_all.log
+system_reactive.log
+thermal_sender.log
+thermal_service.log
 
 # Ignore sub-repo datasets, backup git folder, and virtualenvs
-# timeseries_service/received_data/
-# timeseries_service/data/live_thermal_history.csv
-# timeseries_service/data/live_predictions.csv
-# timeseries_service/data/live_evaluations.csv
+timeseries_service/received_data/
+timeseries_service/data/*_live_*.csv
+timeseries_service/model/*.h5
 timeseries_service/tf_env/
 timeseries_service/.codex
 timeseries_service/.git_backup/

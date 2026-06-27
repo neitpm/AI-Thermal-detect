@@ -46,7 +46,7 @@ API_MAX_WORKERS = 1
 JPEG_QUALITY = 85
 
 os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = (
-    "rtsp_transport;tcp|max_delay;500000|fflags;nobuffer"
+    "rtsp_transport;tcp|max_delay;500000|fflags;nobuffer|stimeout;5000000"
 )
 
 TRT_LOGGER = trt.Logger(trt.Logger.ERROR)
