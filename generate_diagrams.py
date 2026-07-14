@@ -247,7 +247,7 @@ def generate_png_diagrams():
         # hoặc mã hóa base64 thông thường sau đó urlencode
         # Hãy dùng urlsafe_b64encode
         encoded = base64.urlsafe_b64encode(code.encode("utf-8")).decode("utf-8")
-        url = f"https://mermaid.ink/img/{encoded}"
+        url = f"https://mermaid.ink/img/{encoded}?type=png"
         
         output_path = os.path.join(DIAGRAMS_DIR, f"{name}.png")
         
