@@ -64,7 +64,7 @@
     *   Nhận diện đối tượng người với độ chính xác IoU Threshold = 0.45 và Confidence Threshold = 0.55.
     *   Lọc nhiễu đối tượng dựa trên kích thước khung chữ nhật tối thiểu (20x40 pixel) và tỷ lệ khung hình chuẩn của người (tỷ lệ rộng/cao từ 0.2 đến 1.2) để tránh báo động giả do chim thú hay nhiễu ánh sáng.
 *   **F-03: Ghi hình sự kiện động chống rung giật (Dynamic Event Recorder):** Khi phát hiện có người, tự khởi động tiến trình ghi video dạng MP4. Thời gian ghi tự động gia hạn thêm 3 giây (grace period) tính từ khung hình cuối cùng nhìn thấy người để tránh việc video bị ngắt quãng khi người đi khuất sau cột điện tạm thời.
-*   **F-04: API Nhận dữ liệu nhiệt độ đa kênh (Multi-camera Partitioning Receiver):** API FastAPI nhận dữ liệu nhiệt độ thô từ camera nhiệt gửi lên. Tự động phân luồng dữ liệu của từng camera dựa vào IP người gửi (`192.168.10.152`, `192.168.10.120`,...) và lưu trữ riêng biệt để phục vụ huấn luyện mô hình độc lập.
+*   **F-04: API Nhận dữ liệu nhiệt độ đa kênh (Multi-camera Partitioning Receiver):** API FastAPI nhận dữ liệu nhiệt độ thô từ camera nhiệt gửi lên. Tự động phân luồng dữ liệu của từng camera dựa vào IP người gửi (ví dụ: `192.168.x.152`, `192.168.x.120`,...) và lưu trữ riêng biệt để phục vụ huấn luyện mô hình độc lập.
 *   **F-05: Tự động đồng bộ hóa cấu hình điểm đo (Config Schema Dynamic Sync):** Khi người vận hành cấu hình thêm/bớt các điểm đo nhiệt từ xa, hệ thống biên tự quét lại file CSV lịch sử hiện tại, thực hiện cập nhật thêm cột mới (điền giá trị trống cho dữ liệu cũ) hoặc ẩn cột cũ mà không làm hỏng cấu trúc dữ liệu lịch sử hiện có.
 *   **F-06: Dự báo chuỗi thời gian đa biến bằng AI (MTKAN Forecasting Engine):**
     *   Trích xuất dữ liệu lịch sử chuỗi thời gian nhiệt độ từ CSV.
@@ -197,30 +197,10 @@ erDiagram
 #### A. Cấu trúc tập tin chứa danh sách tọa độ điểm đo nhiệt (`{camera_ip}_thermal_points.json`)
 File này lưu trữ tọa độ chuẩn hóa của các điểm cần theo dõi nhiệt độ trên ma trận ảnh nhiệt. Tọa độ `x` và `y` nằm trong khoảng `[0.0, 1.0]`, tương ứng với tỷ lệ vị trí trên toàn khung hình của camera nhiệt.
 *   *Đường dẫn lưu trữ:* `timeseries_service/data/{camera_ip}_thermal_points.json`
-```json
-{
-  "points": [
-    {
-      "id": "pt_trans_1",
-      "label": "Diem Tiep Xuc MBA T1",
-      "x": 0.4125,
-      "y": 0.5834
-    },
-    {
-      "id": "pt_trans_2",
-      "label": "Diem Tiep Xuc MBA T2",
-      "x": 0.6281,
-      "y": 0.5912
-    },
-    {
-      "id": "pt_bushing_a",
-      "label": "Dau Su Co A",
-      "x": 0.2845,
-      "y": 0.3120
-    }
-  ]
-}
-```
+*   *Danh sách các điểm đo được cấu hình bao gồm:*
+    *   **Điểm 1**: Mã định danh `pt_trans_1`, nhãn `"Diem Tiep Xuc MBA T1"`, tọa độ tỷ lệ `x = 0.4125`, `y = 0.5834`.
+    *   **Điểm 2**: Mã định danh `pt_trans_2`, nhãn `"Diem Tiep Xuc MBA T2"`, tọa độ tỷ lệ `x = 0.6281`, `y = 0.5912`.
+    *   **Điểm 3**: Mã định danh `pt_bushing_a`, nhãn `"Dau Su Co A"`, tọa độ tỷ lệ `x = 0.2845`, `y = 0.3120`.
 
 #### B. Tập tin dữ liệu chuỗi thời gian lịch sử (`{camera_ip}_live_thermal_history.csv`)
 Lưu trữ toàn bộ lịch sử nhiệt độ thu thập được từ camera nhiệt. Cấu trúc file tự động thay đổi số lượng cột tương ứng với cấu hình trong tập tin JSON phía trên.
@@ -228,49 +208,26 @@ Lưu trữ toàn bộ lịch sử nhiệt độ thu thập được từ camera 
 *   *Các cột dữ liệu:*
     *   `Timestamp`: Chuỗi thời gian định dạng `YYYY-MM-DD HH:MM:SS`.
     *   Các cột tiếp theo tên cột trùng khớp với giá trị `label` trong file cấu hình điểm nhiệt độ.
-*   *Dữ liệu mẫu:*
-```csv
-Timestamp,Diem Tiep Xuc MBA T1,Diem Tiep Xuc MBA T2,Dau Su Co A
-2026-07-14 13:00:00,42.5,43.1,37.2
-2026-07-14 13:01:00,42.6,43.2,37.3
-2026-07-14 13:02:00,42.8,43.1,37.5
-2026-07-14 13:03:00,43.1,43.5,37.4
-```
+*   *Dữ liệu lịch sử mẫu:*
+
+| Thời gian (Timestamp) | Diem Tiep Xuc MBA T1 | Diem Tiep Xuc MBA T2 | Dau Su Co A |
+| :--- | :--- | :--- | :--- |
+| 2026-07-14 13:00:00 | 42.5°C | 43.1°C | 37.2°C |
+| 2026-07-14 13:01:00 | 42.6°C | 43.2°C | 37.3°C |
+| 2026-07-14 13:02:00 | 42.8°C | 43.1°C | 37.5°C |
+| 2026-07-14 13:03:00 | 43.1°C | 43.5°C | 37.4°C |
 
 #### C. Tập tin cấu hình học máy (`{camera_ip}_config.json`)
 Lưu các tham số cấu hình phục vụ quá trình tiền xử lý dữ liệu và huấn luyện mô hình dự báo MTKAN cục bộ.
 *   *Đường dẫn lưu trữ:* `timeseries_service/model/{camera_ip}_config.json`
-```json
-{
-  "window_size": 5,
-  "horizon": 5,
-  "seasonal_period": 60,
-  "targets": [
-    "Diem Tiep Xuc MBA T1",
-    "Diem Tiep Xuc MBA T2",
-    "Dau Su Co A"
-  ],
-  "feature_cols": [
-    "Diem Tiep Xuc MBA T1",
-    "Diem Tiep Xuc MBA T1_trend",
-    "Diem Tiep Xuc MBA T1_seasonal",
-    "Diem Tiep Xuc MBA T1_residual",
-    "Diem Tiep Xuc MBA T2",
-    "Diem Tiep Xuc MBA T2_trend",
-    "Diem Tiep Xuc MBA T2_seasonal",
-    "Diem Tiep Xuc MBA T2_residual",
-    "Dau Su Co A",
-    "Dau Su Co A_trend",
-    "Dau Su Co A_seasonal",
-    "Dau Su Co A_residual"
-  ],
-  "target_cols": [
-    "Diem Tiep Xuc MBA T1_t5",
-    "Diem Tiep Xuc MBA T2_t5",
-    "Dau Su Co A_t5"
-  ]
-}
-```
+*   *Các tham số cấu hình bao gồm:*
+    *   **Kích thước cửa sổ (window_size)**: `5` chu kỳ đo liên tiếp làm đầu vào cho mô hình AI.
+    *   **Tầm dự báo (horizon)**: `5` bước tiếp theo (tương đương 5 phút kế tiếp).
+    *   **Chu kỳ mùa (seasonal_period)**: `60` mẫu dữ liệu phục vụ phân rã chuỗi thời gian STL.
+    *   **Danh sách điểm đích cần dự báo (targets)**: `Diem Tiep Xuc MBA T1`, `Diem Tiep Xuc MBA T2`, `Dau Su Co A`.
+    *   **Danh sách các cột đặc trưng đầu vào (feature_cols)**: Gồm giá trị nhiệt độ thô hiện tại cùng các thành phần xu hướng (`trend`), chu kỳ (`seasonal`), và phần dư (`residual`) tương ứng cho từng điểm đo.
+    *   **Danh sách các cột kết quả đầu ra (target_cols)**: Gồm giá trị nhiệt độ dự báo tại thời điểm `t+5` cho từng điểm đo tương ứng.
+
 
 ---
 
@@ -452,33 +409,15 @@ stateDiagram-v2
 
 Giao diện Web Dashboard hiển thị tập trung tại Máy chủ Trung tâm bao gồm thiết kế bố cục đáp ứng như sau:
 
-```
-+-----------------------------------------------------------------------------------+
-| [SYSTEM LOGO]  HỆ THỐNG GIÁM SÁT AN NINH & NHIỆT ĐỘ TRẠM BIẾN ÁP BIÊN             |
-+-----------------------------------------------------------------------------------+
-|  [BẢN ĐỒ TRẠM]              |  [CAMERA AN NINH LIVE]                              |
-|  * Trạm 110kV Cát Lái       |  +-----------------------------------------------+  |
-|  * Trạm 110kV Thủ Đức       |  |  [WARNING: Intrusion Detected]                |  |
-|                             |  |      +--------------+                         |  |
-|                             |  |      |   [PERSON]   |    FPS: 28.5            |  |
-|                             |  |      |    Score 89% |                         |  |
-|                             |  |      +--------------+                         |  |
-|                             |  +-----------------------------------------------+  |
-+-----------------------------+-----------------------------------------------------+
-|  [CAMERA NHIỆT HỒNG NGOẠI]   |  [BIỂU ĐỒ DỰ BÁO XU HƯỚNG NHIỆT (MÔ HÌNH MTKAN)]    |
-|  +-----------------------+  |   Nhiệt độ (°C)                                     |
-|  |  (Pt.1: 45.2°C) [x]   |  |   55 |                                              |
-|  |                       |  |   50 |               / - - - - [Dự báo 5 phút tới]  |
-|  |          (Pt.2: 41°C) |  |   45 |______________/                               |
-|  |                       |  |   40 |  Lịch sử                                     |
-|  +-----------------------+  |      +-----------------------------------------     |
-|  * Click ảnh để thêm điểm đo|      13:00   13:01   13:02   13:03   13:04   13:05     |
-+-----------------------------+-----------------------------------------------------+
-|  [DANH SÁCH CẢNH BÁO MỚI NHẤT]                                                    |
-|  [13:02:15] CẢNH BÁO ĐỎ: Phát hiện xâm nhập tại Camera 1 (Xem Video sự kiện MP4)  |
-|  [12:59:00] CẢNH BÁO VÀNG: Nhiệt độ dự báo tại "MBA T1" vượt ngưỡng (Dự báo: 52°C)|
-+-----------------------------------------------------------------------------------+
-```
+*   **Thanh tiêu đề chính (Header)**: Hiển thị Logo hệ thống và tiêu đề lớn "HỆ THỐNG GIÁM SÁT AN NINH & NHIỆT ĐỘ TRẠM BIẾN ÁP BIÊN".
+*   **Bảng điều khiển trung tâm (Dashboard Grid Layout)**:
+    *   **Khu vực 1: Bản đồ trạm (Substation Map)**: Hiển thị sơ đồ mặt bằng các trạm biến áp (ví dụ: Trạm 110kV Cát Lái, Trạm 110kV Thủ Đức) giúp nhân viên định vị vị trí lắp đặt thiết bị.
+    *   **Khu vực 2: Giám sát video an ninh (Live Video Security)**: Khung phát trực tiếp camera quang học thời gian thực tích hợp cảnh báo đỏ nhấp nháy khi phát hiện xâm nhập (`WARNING: Intrusion Detected`), đóng khung nhận diện đối tượng (`[PERSON] Score 89%`, tốc độ khung hình `FPS: 28.5`).
+    *   **Khu vực 3: Giám sát nhiệt độ hồng ngoại (Live Thermal Matrix)**: Hiển thị hình ảnh nhiệt từ camera hồng ngoại kèm các điểm đo đã cấu hình (ví dụ: `Pt.1: 45.2°C`, `Pt.2: 41°C`). Người dùng có thể nhấp chuột trực tiếp lên ảnh để thêm/xóa điểm đo cần theo dõi.
+    *   **Khu vực 4: Biểu đồ dự báo xu hướng (Thermal Trend Forecast)**: Biểu đồ đường thể hiện diễn biến nhiệt độ lịch sử song song với đường nét đứt dự báo xu hướng nhiệt độ trong 5 phút tiếp theo bằng mô hình AI MTKAN.
+*   **Khu vực hiển thị cảnh báo mới nhất (Alerts Log)**: Danh sách cuộn thời gian thực hiển thị các sự kiện bất thường:
+    *   *Cảnh báo Đỏ (Nguy hiểm)*: Phát hiện xâm nhập kèm liên kết xem nhanh video sự kiện MP4 ghi hình tại biên.
+    *   *Cảnh báo Vàng (Cảnh báo)*: Khi nhiệt độ dự báo vượt ngưỡng quy định (ví dụ: Dự báo nhiệt độ tại thiết bị vượt 52°C trong 5 phút tới).
 
 ---
 
@@ -546,8 +485,8 @@ Lịch sử chi tiết toàn bộ các commit trong repository của dự án bi
 *   **Commit Hash:** `3378811`
     *   *Tác giả:* admin-khai <admin-khai@example.com>
     *   *Ngày thực hiện:* Sat May 30 17:56:54 2026 +0700
-    *   *Tiêu đề:* Update central server IP to 102, uncomment YOLOv8, and add edge system script files
-    *   *Chi tiết:* Cập nhật địa chỉ IP máy chủ trung tâm thành `192.168.10.102`, kích hoạt chạy module YOLOv8 và bổ sung các file script điều hành biên (`main_all.py`, `yolo_detect.py`, `thermal_sender.py`).
+    *   *Tiêu đề:* Update central server IP, uncomment YOLOv8, and add edge system script files
+    *   *Chi tiết:* Cập nhật địa chỉ IP máy chủ trung tâm thành `192.168.x.102`, kích hoạt chạy module YOLOv8 và bổ sung các file script điều hành biên (`main_all.py`, `yolo_detect.py`, `thermal_sender.py`).
 *   **Commit Hash:** `db2c8c6`
     *   *Tác giả:* admin-khai <admin-khai@example.com>
     *   *Ngày thực hiện:* Thu Apr 23 08:18:50 2026 +0700
@@ -563,81 +502,36 @@ Lịch sử chi tiết toàn bộ các commit trong repository của dự án bi
 
 ### 2. Cấu trúc cây thư mục mã nguồn đầy đủ (Source Code Tree)
 
-```
-smart_camera_edge_system/
-│
-├── .env                                  # Tệp cấu hình các biến môi trường tại biên
-├── README.md                             # Hướng dẫn tổng quát dự án
-├── requirements.txt                      # Các thư viện Python cần cài đặt
-├── main_all.py                           # Kịch bản chính điều phối chạy song song đa luồng
-├── yolo_detect.py                        # Kịch bản nhận dạng người (TensorRT & Video MP4 event)
-├── thermal_sender.py                     # Kịch bản đọc camera nhiệt vật lý gửi dữ liệu
-├── central_station.py                    # Chương trình mô phỏng máy chủ trung tâm nhận dữ liệu
-├── install_service.sh                    # Kịch bản bash cài đặt dịch vụ tự chạy cùng hệ điều hành
-├── smart_camera.service.template         # File cấu hình dịch vụ Systemd mẫu
-├── thermal_service.log                   # File log của dịch vụ thu thập nhiệt độ
-├── thermal_sender.log                    # File log của luồng gửi dữ liệu camera nhiệt
-├── system_all.log                        # Log tổng hợp hệ thống biên
-├── system_reactive.log                   # Log chế độ thụ động
-├── event_1780465557.mp4                  # File video sự kiện xâm nhập mẫu được ghi
-│
-├── models/                               # Chứa các model nhận diện đối tượng YOLOv8
-│   ├── best.pt                           # Trọng số PyTorch gốc
-│   ├── best.onnx                         # Định dạng trung gian ONNX
-│   ├── best.engine                       # Định dạng TensorRT tối ưu cho GPU Jetson
-│   └── yolov8n.engine                    # Model YOLOv8 Nano TensorRT mặc định
-│
-├── received_data/                        # Lưu trữ gói tin JSON thô theo camera
-│   ├── 192_168_10_120/
-│   ├── 192_168_10_152/
-│   └── 192_168_10_200/
-│
-└── timeseries_service/                   # Phân hệ thu thập và dự báo chuỗi thời gian nhiệt độ
-    ├── thermal_receiver.py               # API FastAPI chính (Port 8080) nhận và dự báo nhiệt
-    ├── train.py                          # Kịch bản huấn luyện lại mô hình AI cục bộ
-    ├── test_load.py                      # Kịch bản test tải của API
-    ├── thermal_matrix.py                 # Module xử lý ma trận ảnh nhiệt độ thô
-    │
-    ├── tf_env/                           # Môi trường ảo Python độc lập cho TensorFlow
-    │   ├── bin/
-    │   ├── include/
-    │   ├── lib/
-    │   └── pyvenv.cfg
-    │
-    ├── data/                             # Dữ liệu lịch sử và cấu hình điểm đo theo camera IP
-    │   ├── 192_168_10_120_live_thermal_history.csv
-    │   ├── 192_168_10_120_thermal_points.json
-    │   ├── 192_168_10_152_live_evaluations.csv
-    │   ├── 192_168_10_152_live_predictions.csv
-    │   ├── 192_168_10_152_live_thermal_history.csv
-    │   ├── 192_168_10_152_thermal_points.json
-    │   ├── 192_168_10_200_live_evaluations.csv
-    │   ├── 192_168_10_200_live_predictions.csv
-    │   ├── 192_168_10_200_live_thermal_history.csv
-    │   ├── 192_168_10_200_thermal_points.json
-    │   └── live_predictions.csv
-    │
-    ├── model/                            # Trọng số mô hình và bộ chuẩn hóa Scaler theo camera
-    │   ├── 192_168_10_120_config.json
-    │   ├── 192_168_10_120_linear_reg.pkl
-    │   ├── 192_168_10_120_training_meta.json
-    │   ├── 192_168_10_152_config.json
-    │   ├── 192_168_10_152_linear_reg.pkl
-    │   ├── 192_168_10_152_scaler_X.pkl
-    │   ├── 192_168_10_152_scaler_y.pkl
-    │   ├── 192_168_10_152_training_meta.json
-    │   ├── 192_168_10_200_config.json
-    │   ├── 192_168_10_200_linear_reg.pkl
-    │   ├── 192_168_10_200_training_meta.json
-    │   ├── mtkan_weights.weights.h5
-    │   └── training_meta.json
-    │
-    └── src/                              # Thư mục mã nguồn xử lý thuật toán dự báo
-        ├── model_builder.py              # Xây dựng kiến trúc mô hình MTKAN
-        ├── preprocess.py                 # Tiền xử lý dữ liệu và phân rã chuỗi STL
-        ├── predict.py                    # Gọi dự báo trực tuyến cho 1 camera
-        └── predict_all.py                # Hỗ trợ dự báo đồng thời nhiều camera
-```
+*   **Thư mục gốc (`smart_camera_edge_system/`)**:
+    *   `.env`: Tệp cấu hình các biến môi trường tại thiết bị biên (chứa thông tin IP camera và server).
+    *   `README.md`: Hướng dẫn tổng quát dự án.
+    *   `requirements.txt`: Các thư viện Python cần cài đặt bổ sung.
+    *   `main_all.py`: Kịch bản chính điều phối chạy song song đa luồng.
+    *   `yolo_detect.py`: Kịch bản nhận dạng người (TensorRT & Video MP4 event).
+    *   `thermal_sender.py`: Kịch bản đọc camera nhiệt vật lý gửi dữ liệu.
+    *   `central_station.py`: Chương trình mô phỏng máy chủ trung tâm nhận dữ liệu.
+    *   `install_service.sh`: Kịch bản bash cài đặt dịch vụ tự chạy cùng hệ điều hành.
+    *   `smart_camera.service.template`: File cấu hình dịch vụ Systemd mẫu.
+    *   `thermal_service.log`, `thermal_sender.log`, `system_all.log`, `system_reactive.log`: Các file log ghi nhật ký hoạt động của hệ thống và dịch vụ biên.
+    *   `event_xxxxxxxxx.mp4`: File video ghi hình sự kiện xâm nhập thực tế mẫu.
+    *   **Thư mục `models/`**: Chứa các mô hình nhận diện đối tượng YOLOv8:
+        *   `best.pt`: Trọng số PyTorch gốc.
+        *   `best.onnx`: Định dạng trung gian ONNX.
+        *   `best.engine`: Định dạng TensorRT đã được tối ưu hóa cho GPU Jetson.
+        *   `yolov8n.engine`: Model YOLOv8 Nano TensorRT mặc định của hệ thống.
+    *   **Thư mục `received_data/`**: Lưu trữ gói tin JSON thô theo từng camera nhiệt phân chia theo địa chỉ IP (ví dụ: `192_168_x_120/`, `192_168_x_152/`, `192_168_x_200/`).
+    *   **Thư mục `timeseries_service/`**: Phân hệ thu thập và dự báo chuỗi thời gian nhiệt độ:
+        *   `thermal_receiver.py`: API FastAPI chính nhận và dự báo nhiệt độ.
+        *   `train.py`: Kịch bản huấn luyện lại mô hình AI cục bộ khi thay đổi điểm đo.
+        *   `test_load.py`: Kịch bản test tải của API.
+        *   `thermal_matrix.py`: Module xử lý ma trận ảnh nhiệt độ thô từ camera gửi lên.
+        *   `tf_env/`: Môi trường ảo Python độc lập phục vụ riêng cho TensorFlow và Keras.
+        *   **Thư mục `data/`**: Dữ liệu lịch sử đo đạc CSV và cấu hình điểm đo JSON của từng camera nhiệt (được phân hoạch theo địa chỉ IP như: `192_168_x_120`, `192_168_x_152`, `192_168_x_200`).
+        *   **Thư mục `model/`**: Trọng số mô hình và bộ chuẩn hóa Scaler được phân hoạch độc lập cho từng camera nhiệt theo địa chỉ IP (như mô hình hồi quy và bộ chuẩn hóa cho các camera `192_168_x_120`, `192_168_x_152`, `192_168_x_200`).
+        *   **Thư mục `src/` (Mã nguồn thuật toán dự báo)**:
+            *   `model_builder.py`: Xây dựng kiến trúc mô hình mạng dự báo MTKAN.
+            *   `preprocess.py`: Tiền xử lý dữ liệu chuỗi thời gian và phân rã chuỗi bằng thuật toán STL.
+            *   `predict.py`, `predict_all.py`: Gọi dự báo trực tuyến cho một hoặc nhiều camera đồng thời.
 
 ---
 
@@ -733,7 +627,7 @@ Dưới đây là báo cáo chi tiết về 6 lỗi kỹ thuật quan trọng ph
 
 #### Bug #04: Lỗi ghi đè/xung đột dữ liệu khi chạy đa camera đồng thời (Multi-camera Data Partitioning)
 *   **Mô tả lỗi:** Ban đầu hệ thống được cấu hình ghi dữ liệu lịch sử vào một file CSV dùng chung và lưu trọng số mô hình MTKAN vào cùng một tệp mặc định. Khi vận hành đồng thời 3 camera nhiệt khác nhau, các tiến trình API ghi dữ liệu đồng thời vào file CSV chung gây ra hiện tượng xung đột khóa file ghi (file lock contention), mất mát dữ liệu và mô hình AI liên tục bị nạp sai scaler của camera khác, dẫn đến các dự báo nhiệt độ bị sai lệch hoàn toàn.
-*   **Giải pháp khắc phục:** Triển khai cấu trúc phân hoạch dữ liệu độc lập theo địa chỉ IP của camera (Per-camera Partitioning). Hệ thống biên tự động kiểm tra địa chỉ IP gửi yêu cầu dữ liệu, ánh xạ để tạo các thư mục con riêng biệt dưới thư mục dữ liệu thô `received_data/` và tự động phân tách các tệp cấu hình điểm đo JSON, tệp lịch sử CSV, scaler chuẩn hóa và trọng số mô hình với tiền tố tên file chính là địa chỉ IP của camera đó (ví dụ: `192_168_10_152_live_thermal_history.csv`).
+*   **Giải pháp khắc phục:** Triển khai cấu trúc phân hoạch dữ liệu độc lập theo địa chỉ IP của camera (Per-camera Partitioning). Hệ thống biên tự động kiểm tra địa chỉ IP gửi yêu cầu dữ liệu, ánh xạ để tạo các thư mục con riêng biệt dưới thư mục dữ liệu thô `received_data/` và tự động phân tách các tệp cấu hình điểm đo JSON, tệp lịch sử CSV, scaler chuẩn hóa và trọng số mô hình với tiền tố tên file chính là địa chỉ IP của camera đó (ví dụ: `192_168_x_152_live_thermal_history.csv`).
 
 #### Bug #05: Lỗi gửi cảnh báo trùng lặp liên tục (Alert Spam / Flood) khi phát hiện người xâm nhập
 *   **Mô tả lỗi:** Do mô hình YOLOv8 chạy suy luận với tần suất cao (28 FPS), khi có một người di chuyển chậm trong khu vực an ninh hàng rào, hệ thống liên tục phát hiện "person" ở mỗi khung hình và gọi API gửi cảnh báo HTTP POST về Central Server. Điều này tạo ra hàng trăm yêu cầu gửi liên tục trong 10 giây, gây nghẽn băng thông mạng LAN của trạm và làm tràn bộ đệm hiển thị cảnh báo tại máy chủ trung tâm.
@@ -756,70 +650,35 @@ Hội đồng nghiệm thu thống nhất ký biên bản xác nhận bàn giao 
 ### 2. Hướng dẫn sử dụng & vận hành hệ thống (User & Operations Guide)
 
 #### A. Cài đặt các thư viện phụ thuộc (Dependencies Installation)
-Hệ thống biên yêu cầu môi trường JetPack của NVIDIA đã cài đặt sẵn CUDA và TensorRT. Thực hiện cài đặt các thư viện Python bổ trợ thông qua tệp `requirements.txt`:
-```bash
-# 1. Di chuyển vào thư mục dự án biên
-cd /home/admin-khai/Desktop/smart_camera_edge_system
-
-# 2. Cài đặt các thư viện hệ thống yêu cầu
-sudo apt-get update
-sudo apt-get install -y python3-pip python3-h5py python3-numpy python3-opencv fuser
-
-# 3. Cài đặt các thư viện python bổ trợ
-pip3 install -r requirements.txt
-```
+Hệ thống biên yêu cầu môi trường JetPack của NVIDIA đã cài đặt sẵn CUDA và TensorRT. Quy trình thực hiện:
+1. Di chuyển vào thư mục dự án biên: `/home/admin-khai/Desktop/smart_camera_edge_system`
+2. Cập nhật cơ sở dữ liệu gói và cài đặt các thư viện hệ thống yêu cầu bao gồm công cụ cài đặt thư viện python `python3-pip`, thư viện cấu trúc file H5 `python3-h5py`, thư viện toán học `python3-numpy`, thư viện xử lý ảnh OpenCV `python3-opencv` và công cụ giải phóng tiến trình chiếm dụng cổng `fuser`.
+3. Sử dụng công cụ `pip3` để tự động cài đặt các thư viện python bổ trợ được liệt kê cụ thể trong tệp `requirements.txt`.
 
 #### B. Cấu hình các biến môi trường trong file `.env`
-Tạo file `.env` tại thư mục gốc của dự án để thiết lập các tham số chạy:
-```env
-# Địa chỉ IP của Camera IP quang dùng để phát hiện xâm nhập
-CAMERA_IP=192.168.10.152
-# Luồng RTSP truyền hình ảnh thời gian thực từ camera quang
-CAMERA_RTSP_URL=rtsp://admin:Demo%402024@192.168.10.152:554/Streaming/Channels/102
+Thiết lập các tham số chạy thông qua việc tạo file cấu hình `.env` tại thư mục gốc của dự án biên. Danh sách các biến cấu hình cần thiết được đặc tả chi tiết trong bảng dưới đây (để đảm bảo an toàn thông tin, các địa chỉ IP cụ thể đã được ẩn bằng ký tự đại diện `x`):
 
-# Đường dẫn đến tệp mô hình YOLOv8 đã tối ưu hóa TensorRT (.engine)
-YOLO_ENGINE_PATH=models/yolov8n.engine
-# Ngưỡng tin cậy nhận diện người (Confidence Threshold)
-YOLO_CONF_THRESHOLD=0.55
-
-# Địa chỉ IP của Máy chủ giám sát trung tâm (Central Station) nhận cảnh báo
-CENTRAL_STATION_IP=192.168.10.102
-# API URL nhận bản tin cảnh báo người xâm nhập kèm video
-YOLO_ALERT_API_URL=http://192.168.10.102:5000/api/person-detection
-```
+| Tên biến cấu hình | Vai trò & Mô tả ý nghĩa | Giá trị ví dụ (Che IP cụ thể) |
+| :--- | :--- | :--- |
+| `CAMERA_IP` | Địa chỉ IP của Camera IP quang dùng để phát hiện xâm nhập | `192.168.x.152` |
+| `CAMERA_RTSP_URL` | Luồng RTSP truyền hình ảnh thời gian thực từ camera quang | `rtsp://admin:Demo%402024@192.168.x.152:554/Streaming/Channels/102` |
+| `YOLO_ENGINE_PATH` | Đường dẫn đến tệp mô hình YOLOv8 đã tối ưu hóa TensorRT | `models/yolov8n.engine` |
+| `YOLO_CONF_THRESHOLD` | Ngưỡng tin cậy nhận diện người tối thiểu | `0.55` |
+| `CENTRAL_STATION_IP` | Địa chỉ IP của Máy chủ giám sát trung tâm nhận cảnh báo | `192.168.x.102` |
+| `YOLO_ALERT_API_URL` | API URL nhận bản tin cảnh báo người xâm nhập kèm video sự kiện | `http://192.168.x.102:5000/api/person-detection` |
 
 #### C. Quy trình vận hành và chạy dịch vụ ngầm (Systemd Service)
 Hệ thống được thiết kế để tự động vận hành khi thiết bị biên Jetson được cắm nguồn điện.
 
 1.  **Cài đặt dịch vụ hệ thống tự chạy:**
-    Hệ thống cung cấp sẵn script bash `install_service.sh` để đăng ký dịch vụ chạy ngầm với Linux Systemd.
-    ```bash
-    chmod +x install_service.sh
-    sudo ./install_service.sh
-    ```
-    Script này sẽ tự động tạo file dịch vụ `/etc/systemd/system/smart_camera.service` dựa trên file template và nạp lại cấu hình hệ thống.
+    Hệ thống cung cấp sẵn script bash `install_service.sh` để đăng ký dịch vụ chạy ngầm với Linux Systemd. Thực hiện cấp quyền chạy cho kịch bản `install_service.sh` bằng lệnh phân quyền `chmod +x`, sau đó chạy kịch bản dưới quyền quản trị viên `sudo` để tự động nạp dịch vụ mẫu `smart_camera.service` vào thư mục cấu hình hệ thống `/etc/systemd/system/`.
 
 2.  **Quản lý dịch vụ bằng dòng lệnh (CLI commands):**
-    *   *Khởi động dịch vụ:*
-        ```bash
-        sudo systemctl start smart_camera.service
-        ```
-    *   *Dừng dịch vụ:*
-        ```bash
-        sudo systemctl stop smart_camera.service
-        ```
-    *   *Tự động chạy dịch vụ khi khởi động hệ điều hành:*
-        ```bash
-        sudo systemctl enable smart_camera.service
-        ```
-    *   *Kiểm tra trạng thái hoạt động thực tế của dịch vụ:*
-        ```bash
-        sudo systemctl status smart_camera.service
-        ```
-    *   *Xem nhật ký log hoạt động thời gian thực:*
-        ```bash
-        journalctl -u smart_camera.service -f
-        ```
+    *   *Khởi động dịch vụ:* Sử dụng câu lệnh quản trị hệ thống `systemctl start smart_camera.service` (chạy với quyền quản trị viên `sudo`).
+    *   *Dừng dịch vụ:* Sử dụng câu lệnh quản trị hệ thống `systemctl stop smart_camera.service` (chạy với quyền quản trị viên `sudo`).
+    *   *Tự động chạy dịch vụ khi khởi động hệ điều hành:* Sử dụng câu lệnh quản trị hệ thống `systemctl enable smart_camera.service` (chạy với quyền quản trị viên `sudo`).
+    *   *Kiểm tra trạng thái hoạt động thực tế của dịch vụ:* Sử dụng câu lệnh kiểm tra trạng thái `systemctl status smart_camera.service` (chạy với quyền quản trị viên `sudo`).
+    *   *Xem nhật ký log hoạt động trực tuyến:* Sử dụng câu lệnh truy xuất nhật ký hệ thống `journalctl -u smart_camera.service -f`.
 
 #### D. Hướng dẫn xử lý sự cố nhanh (Troubleshooting Guide)
 1.  **Sự cố 1: Cổng mạng `8080` bị chiếm dụng không khởi chạy được Thermal Receiver API.**
@@ -828,8 +687,4 @@ Hệ thống được thiết kế để tự động vận hành khi thiết b�
 2.  **Sự cố 2: Lỗi TensorRT Engine Deserialization Failure.**
     *   *Triệu chứng:* Khởi động YOLO xuất hiện lỗi `RuntimeError: Khong load duoc TensorRT engine.`
     *   *Nguyên nhân:* Tệp `.engine` được tạo từ phiên bản TensorRT khác với phiên bản hiện tại trên thiết bị Jetson.
-    *   *Khắc phục:* Thực hiện xuất lại mô hình từ file gốc `.onnx` sang `.engine` trực tiếp trên thiết bị Jetson bằng lệnh:
-        ```bash
-        trtexec --onnx=models/best.onnx --saveEngine=models/best.engine --fp16
-        ```
-        Sau đó cập nhật đường dẫn `YOLO_ENGINE_PATH=models/best.engine` trong file `.env`.
+    *   *Khắc phục:* Thực hiện xuất lại mô hình từ file gốc `.onnx` sang `.engine` trực tiếp trên thiết bị Jetson bằng cách chạy công cụ biên dịch tối ưu hóa `trtexec` với các tham số: nguồn `--onnx=models/best.onnx`, đích lưu `--saveEngine=models/best.engine` và chế độ dấu phẩy động 16-bit `--fp16`. Sau đó cập nhật đường dẫn `YOLO_ENGINE_PATH=models/best.engine` trong file cấu hình `.env`.
