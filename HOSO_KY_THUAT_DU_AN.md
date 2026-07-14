@@ -396,8 +396,8 @@ graph TD
     
     subgraph API_Processing["Xử lý tại API Biên (FastAPI)"]
         Send --> CheckSchema{Cấu hình targets thay đổi?}
-        CheckSchema -- Có --> SyncHeaders[Cập nhật schema CSV - Không mất dữ liệu cũ]
-        CheckSchema -- Không --> AppendCSV[Ghi thêm dòng dữ liệu mới vào CSV]
+        CheckSchema -->|Có| SyncHeaders[Cập nhật schema CSV - Không mất dữ liệu cũ]
+        CheckSchema -->|Không| AppendCSV[Ghi thêm dòng dữ liệu mới vào CSV]
         SyncHeaders --> AppendCSV
         
         AppendCSV --> FillNaN[Nội suy dữ liệu bị khuyết thiếu - Interpolate]
@@ -406,8 +406,8 @@ graph TD
         Predict --> Compare{Nhiệt độ dự báo > Ngưỡng?}
     end
     
-    Compare -- Có --> TriggerAlert[Gửi cảnh báo quá nhiệt tức thời về Máy chủ trung tâm]
-    Compare -- Không --> End([Kết thúc chu kỳ])
+    Compare -->|Có| TriggerAlert[Gửi cảnh báo quá nhiệt tức thời về Máy chủ trung tâm]
+    Compare -->|Không| End([Kết thúc chu kỳ])
     TriggerAlert --> End
 ```
 
