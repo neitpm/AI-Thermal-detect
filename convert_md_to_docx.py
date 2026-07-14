@@ -17,12 +17,11 @@ def set_cell_background(cell, fill_hex):
 
 def add_p_border_bottom(paragraph):
     pPr = paragraph._element.get_or_add_pPr()
-    pBdr = parse_xml(f'<w:pBdr {nsdecls("w")}><w:bottom w:val="single" w:sz="6" w:space="1" w:color="4F81BD"/></w:pBdr>')
+    pBdr = parse_xml(f'<w:pBdr {nsdecls("w")}><w:bottom w:val="single" w:sz="6" w:space="1" w:color="2C5282"/></w:pBdr>')
     pPr.append(pBdr)
 
 def add_formatted_text(paragraph, text):
-    # Regex to find bold **text** or inline code `code` or bold-italic ***text***
-    # Let's split by bold-italic, bold, and code.
+    # Regex to find bold ***text***, bold **text**, italic *text*, or inline code `code`
     pattern = r'(\*\*\*.*?\*\*\*|\*\*.*?\*\*|\*.*?\*|`.*?`)'
     tokens = re.split(pattern, text)
     for token in tokens:
@@ -42,7 +41,6 @@ def add_formatted_text(paragraph, text):
             run = paragraph.add_run(token[1:-1])
             run.font.name = 'Courier New'
             run.font.size = Pt(9.5)
-            # Add light gray color to run text
             run.font.color.rgb = RGBColor(180, 50, 50)
         else:
             paragraph.add_run(token)
@@ -50,7 +48,7 @@ def add_formatted_text(paragraph, text):
 def convert_md_to_docx(md_path, docx_path):
     doc = Document()
     
-    # Configure page margins
+    # Configure page margins (1 inch on all sides)
     sections = doc.sections
     for section in sections:
         section.top_margin = Inches(1)
@@ -58,16 +56,18 @@ def convert_md_to_docx(md_path, docx_path):
         section.left_margin = Inches(1)
         section.right_margin = Inches(1)
 
-    # Set default style to Times New Roman
+    # Set default document-wide style to Calibri
     style = doc.styles['Normal']
     font = style.font
-    font.name = 'Times New Roman'
+    font.name = 'Calibri'
     font.size = Pt(11)
-    font.color.rgb = RGBColor(30, 30, 30)
+    font.color.rgb = RGBColor(45, 55, 72) # #2D3748 Dark Gray
+    style.paragraph_format.line_spacing = 1.15
+    style.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
 
     # Color definitions
-    PRIMARY_COLOR = RGBColor(31, 78, 121)    # #1F4E79 Dark Blue
-    SECONDARY_COLOR = RGBColor(89, 89, 89)   # #595959 Dark Gray
+    PRIMARY_COLOR = RGBColor(0x2C, 0x52, 0x82)      # #2C5282 Blue
+    SECONDARY_COLOR = RGBColor(0x2D, 0x37, 0x48)    # #2D3748 Dark Gray
 
     with open(md_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
@@ -77,7 +77,9 @@ def convert_md_to_docx(md_path, docx_path):
     code_content = []
     code_lang = ""
 
-    for line in lines:
+    i = 0
+    while i < len(lines):
+        line = lines[i]
         stripped = line.strip()
         
         # Check for code blocks
@@ -88,6 +90,7 @@ def convert_md_to_docx(md_path, docx_path):
                     in_mermaid_block = False
                     in_code_block = False
                     code_content = []
+                    i += 1
                     continue
 
                 # Add a table with 1 cell to act as a shaded box for code
@@ -108,7 +111,7 @@ def convert_md_to_docx(md_path, docx_path):
                 tcPr.append(tcMar)
                 
                 # Add borders
-                tcBorders = parse_xml(f'<w:tcBorders {nsdecls("w")}><w:top w:val="single" w:sz="4" w:space="0" w:color="D3D3D3"/><w:left w:val="single" w:sz="18" w:space="0" w:color="1F4E79"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="D3D3D3"/><w:right w:val="single" w:sz="4" w:space="0" w:color="D3D3D3"/></w:tcBorders>')
+                tcBorders = parse_xml(f'<w:tcBorders {nsdecls("w")}><w:top w:val="single" w:sz="4" w:space="0" w:color="D3D3D3"/><w:left w:val="single" w:sz="18" w:space="0" w:color="2C5282"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="D3D3D3"/><w:right w:val="single" w:sz="4" w:space="0" w:color="D3D3D3"/></w:tcBorders>')
                 tcPr.append(tcBorders)
 
                 # Write code lines
@@ -138,15 +141,89 @@ def convert_md_to_docx(md_path, docx_path):
                     in_mermaid_block = True
                 else:
                     in_mermaid_block = False
+            i += 1
             continue
 
         if in_code_block:
             if not in_mermaid_block:
                 code_content.append(line)
+            i += 1
             continue
 
-        # Ignore empty lines or generate small spacing
+        # Ignore empty lines
         if not stripped:
+            i += 1
+            continue
+
+        # Handle Markdown Tables (Lines starting with '|')
+        if stripped.startswith('|'):
+            table_lines = []
+            while i < len(lines) and lines[i].strip().startswith('|'):
+                table_lines.append(lines[i].strip())
+                i += 1
+            
+            if len(table_lines) > 0:
+                # Extract headers
+                headers = [c.strip() for c in table_lines[0].split('|')[1:-1]]
+                
+                # Extract data, skip separator line (starts with |:--- or |---)
+                data_rows = []
+                start_idx = 1
+                if len(table_lines) > 1 and re.match(r'^[\s]*\|[\s]*:?-+:?[\s]*\|', table_lines[1]):
+                    start_idx = 2
+                
+                for tl in table_lines[start_idx:]:
+                    row_cells = [c.strip() for c in tl.split('|')[1:-1]]
+                    # Normalize columns length
+                    if len(row_cells) < len(headers):
+                        row_cells += [""] * (len(headers) - len(row_cells))
+                    elif len(row_cells) > len(headers):
+                        row_cells = row_cells[:len(headers)]
+                    data_rows.append(row_cells)
+                
+                # Create Table
+                num_cols = len(headers)
+                num_rows = 1 + len(data_rows)
+                table = doc.add_table(rows=num_rows, cols=num_cols)
+                table.autofit = True
+                
+                # Style Header Row
+                hdr_cells = table.rows[0].cells
+                for col_idx, text in enumerate(headers):
+                    cell = hdr_cells[col_idx]
+                    set_cell_background(cell, "F2F2F2")
+                    p = cell.paragraphs[0]
+                    p.paragraph_format.space_before = Pt(4)
+                    p.paragraph_format.space_after = Pt(4)
+                    run = p.add_run(text)
+                    run.bold = True
+                    run.font.name = 'Arial'
+                    run.font.size = Pt(10)
+                    run.font.color.rgb = SECONDARY_COLOR
+                
+                # Style Data Rows
+                for row_idx, row_data in enumerate(data_rows):
+                    row_cells = table.rows[row_idx + 1].cells
+                    for col_idx, text in enumerate(row_data):
+                        cell = row_cells[col_idx]
+                        p = cell.paragraphs[0]
+                        p.paragraph_format.space_before = Pt(4)
+                        p.paragraph_format.space_after = Pt(4)
+                        run = p.add_run(text)
+                        run.font.name = 'Arial'
+                        run.font.size = Pt(9.5)
+                        run.font.color.rgb = SECONDARY_COLOR
+                
+                # Add thin grey borders using XML manipulation
+                tblPr = table._element.xpath('w:tblPr')
+                if tblPr:
+                    tblBorders = parse_xml(f'<w:tblBorders {nsdecls("w")}><w:top w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/><w:left w:val="none"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/><w:right w:val="none"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="E2E8F0"/><w:insideV w:val="none"/></w:tblBorders>')
+                    tblPr[0].append(tblBorders)
+
+                # Add a spacing paragraph after table
+                p_after = doc.add_paragraph()
+                p_after.paragraph_format.space_before = Pt(0)
+                p_after.paragraph_format.space_after = Pt(6)
             continue
 
         # Check for images
@@ -167,10 +244,10 @@ def convert_md_to_docx(md_path, docx_path):
                 # Add picture
                 p = doc.add_paragraph()
                 p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                p.paragraph_format.space_after = Pt(4)
                 p.paragraph_format.space_before = Pt(12)
+                p.paragraph_format.space_after = Pt(4)
                 run = p.add_run()
-                run.add_picture(img_path, width=Inches(5.8))
+                run.add_picture(img_path, width=Inches(6.0))
                 
                 # Add caption
                 if alt_text:
@@ -180,10 +257,12 @@ def convert_md_to_docx(md_path, docx_path):
                     p_cap.paragraph_format.space_after = Pt(12)
                     run_cap = p_cap.add_run(f"Hình: {alt_text}")
                     run_cap.italic = True
+                    run_cap.font.name = 'Arial'
                     run_cap.font.size = Pt(9.5)
                     run_cap.font.color.rgb = RGBColor(100, 100, 100)
             else:
                 print(f"[WARNING] Image path not found: {img_path}")
+            i += 1
             continue
 
         # Horizontal Rule
@@ -192,6 +271,7 @@ def convert_md_to_docx(md_path, docx_path):
             p.paragraph_format.space_before = Pt(12)
             p.paragraph_format.space_after = Pt(12)
             add_p_border_bottom(p)
+            i += 1
             continue
 
         # Headings
@@ -205,6 +285,7 @@ def convert_md_to_docx(md_path, docx_path):
             run.font.size = Pt(18)
             run.font.color.rgb = PRIMARY_COLOR
             add_p_border_bottom(p)
+            i += 1
             continue
 
         if stripped.startswith('## '):
@@ -215,7 +296,8 @@ def convert_md_to_docx(md_path, docx_path):
             run = p.add_run(stripped[3:])
             run.bold = True
             run.font.size = Pt(14)
-            run.font.color.rgb = PRIMARY_COLOR
+            run.font.color.rgb = SECONDARY_COLOR
+            i += 1
             continue
 
         if stripped.startswith('### '):
@@ -227,6 +309,7 @@ def convert_md_to_docx(md_path, docx_path):
             run.bold = True
             run.font.size = Pt(12)
             run.font.color.rgb = SECONDARY_COLOR
+            i += 1
             continue
 
         if stripped.startswith('#### '):
@@ -239,10 +322,10 @@ def convert_md_to_docx(md_path, docx_path):
             run.italic = True
             run.font.size = Pt(11)
             run.font.color.rgb = SECONDARY_COLOR
+            i += 1
             continue
 
         # Bullet lists and Numbered lists
-        # Check indentation levels
         leading_spaces = len(line) - len(line.lstrip(' '))
         indent_level = leading_spaces // 4
         
@@ -254,6 +337,7 @@ def convert_md_to_docx(md_path, docx_path):
             p.paragraph_format.left_indent = Inches(0.25 * (indent_level + 1))
             p.paragraph_format.space_after = Pt(3)
             p.paragraph_format.space_before = Pt(0)
+            p.paragraph_format.line_spacing = 1.15
             content = list_match.group(2)
             add_formatted_text(p, content)
         elif num_match:
@@ -261,6 +345,7 @@ def convert_md_to_docx(md_path, docx_path):
             p.paragraph_format.left_indent = Inches(0.25 * (indent_level + 1))
             p.paragraph_format.space_after = Pt(3)
             p.paragraph_format.space_before = Pt(0)
+            p.paragraph_format.line_spacing = 1.15
             content = num_match.group(2)
             add_formatted_text(p, content)
         else:
@@ -269,7 +354,10 @@ def convert_md_to_docx(md_path, docx_path):
             p.paragraph_format.space_after = Pt(6)
             p.paragraph_format.space_before = Pt(0)
             p.paragraph_format.line_spacing = 1.15
+            p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
             add_formatted_text(p, line.strip())
+        
+        i += 1
 
     # Save document
     doc.save(docx_path)
@@ -278,4 +366,11 @@ def convert_md_to_docx(md_path, docx_path):
 if __name__ == '__main__':
     md_file = "/home/admin-khai/Desktop/smart_camera_edge_system/HOSO_KY_THUAT_DU_AN.md"
     docx_file = "/home/admin-khai/Desktop/smart_camera_edge_system/HOSO_KY_THUAT_DU_AN.docx"
+    
+    if len(sys.argv) > 1:
+        md_file = sys.argv[1]
+        docx_file = os.path.splitext(md_file)[0] + ".docx"
+    if len(sys.argv) > 2:
+        docx_file = sys.argv[2]
+        
     convert_md_to_docx(md_file, docx_file)
