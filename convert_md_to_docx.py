@@ -56,10 +56,10 @@ def convert_md_to_docx(md_path, docx_path):
         section.left_margin = Inches(1)
         section.right_margin = Inches(1)
 
-    # Set default document-wide style to Calibri
+    # Set default document-wide style to Arial
     style = doc.styles['Normal']
     font = style.font
-    font.name = 'Calibri'
+    font.name = 'Arial'
     font.size = Pt(11)
     font.color.rgb = RGBColor(45, 55, 72) # #2D3748 Dark Gray
     style.paragraph_format.line_spacing = 1.15
