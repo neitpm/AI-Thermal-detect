@@ -1,0 +1,16 @@
+[Unit]
+Description=Smart Camera Edge System Service (YOLO & Thermal Receivers)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory={{WORKING_DIRECTORY}}
+ExecStart=/usr/bin/python3 main_all.py
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=smart_camera
+
+[Install]
+WantedBy=multi-user.target

@@ -26,7 +26,9 @@ Dự án bao gồm 2 dịch vụ chính chạy song song dưới sự điều ph
 
 ---
 
-## 🚀 Hướng dẫn cài đặt & Chạy dự án (Quick Start)
+## 🚀 Hướng dẫn cài đặt & Chạy tự động (Quick Start)
+
+Hệ thống hỗ trợ script cài đặt tự động `install_service.sh` giúp chuẩn bị môi trường ảo, cài đặt tất cả dependencies và đăng ký dịch vụ chạy nền Systemd chỉ với **1 câu lệnh duy nhất**.
 
 ### Bước 1: Clone dự án và truy cập thư mục gốc
 ```bash
@@ -34,72 +36,69 @@ git clone <url-cua-ban> smart_camera_edge_system
 cd smart_camera_edge_system
 ```
 
-### Bước 2: Cấu hình Môi trường ảo cho Dịch vụ Thermal (TensorFlow)
-Dịch vụ thermal chạy trong môi trường ảo chuyên dụng `tf_env` đặt trong thư mục `timeseries_service` để đảm bảo không bị xung đột thư viện:
-
+### Bước 2: Chạy kịch bản cài đặt tự động
 ```bash
-cd timeseries_service
-# Tạo môi trường ảo
-python3 -m venv tf_env
-# Kích hoạt môi trường ảo
-source tf_env/bin/activate
-
-# Nâng cấp pip và cài đặt thư viện
-pip install --upgrade pip
-pip install -r ../requirements.txt
-
-# Cài đặt TensorFlow tương thích với Jetson (Nên dùng bản do NVIDIA cung cấp)
-# Hoặc cài đặt bản chuẩn từ pip nếu chạy trên PC thông thường:
-pip install tensorflow
-
-deactivate
-cd ..
+chmod +x install_service.sh
+sudo ./install_service.sh
 ```
-
-### Bước 3: Cài đặt thư viện cho Bộ phát hiện người (YOLO TensorRT)
-Ở thư mục gốc của dự án, cài đặt các thư viện phục vụ xử lý luồng camera và TensorRT:
-
-```bash
-# Cài đặt các thư viện cơ bản
-pip install opencv-python requests pycuda
-```
+*Lệnh này sẽ tự động thực hiện:*
+1. Cài đặt các gói thư viện hệ thống cần thiết qua `apt`.
+2. Tạo môi trường ảo Python độc lập (`tf_env`) cho module xử lý chuỗi thời gian nhiệt độ.
+3. Tự động cài đặt các dependencies Python cần thiết cho cả YOLOv8 và Thermal Receiver.
+4. Tự động tạo tệp cấu hình `.env` mặc định (nếu chưa tồn tại).
+5. Đăng ký, kích hoạt và khởi chạy dịch vụ chạy nền `smart_camera.service` với Systemd.
 
 ---
 
 ## ⚙️ Cấu hình Hệ thống (Configuration)
 
-### 1. Cấu hình Camera RTSP & API Endpoint
-Chỉnh sửa file `api_send.py` hoặc `yolo_detect.py` để thay đổi camera nguồn và URL đích:
-* **`SOURCE`**: Đường dẫn RTSP của camera IP của bạn.
-* **`API_URL`**: Địa chỉ server đích nhận cảnh báo phát hiện người.
-* **`CONF_THRES`**: Ngưỡng tự tin phát hiện người (Mặc định: 0.55).
+Trước khi vận hành thực tế, hãy cấu hình các tham số tại file `.env` ở thư mục gốc:
+```env
+# Địa chỉ IP của Camera IP quang dùng để phát hiện xâm nhập
+CAMERA_IP=192.168.10.152
+# Luồng RTSP truyền hình ảnh thời gian thực từ camera quang
+CAMERA_RTSP_URL=rtsp://admin:Demo%402024@192.168.10.152:554/Streaming/Channels/102
 
-### 2. Cấu hình các điểm nhiệt độ giám sát
-Chỉnh sửa file cấu hình tại `timeseries_service/model/config.json` để thay đổi danh sách các điểm nhiệt độ camera đo được:
-* **`targets`**: Danh sách ID các điểm nhiệt (Mặc định: `ID_1` đến `ID_6`).
+# Đường dẫn đến tệp mô hình YOLOv8 đã tối ưu hóa TensorRT (.engine)
+YOLO_ENGINE_PATH=models/yolov8n.engine
+# Ngưỡng tin cậy nhận diện người (Confidence Threshold)
+YOLO_CONF_THRESHOLD=0.55
+
+# Địa chỉ IP của Máy chủ giám sát trung tâm (Central Station) nhận cảnh báo
+CENTRAL_STATION_IP=192.168.10.102
+```
 
 ---
 
-## 🎯 Chạy ứng dụng (Execution)
+## 🎯 Điều khiển & Quản lý Dịch vụ (Service Management)
 
-### Cách 1: Chạy song song cả hai dịch vụ bằng Master Daemon (Khuyên dùng)
-Tại thư mục gốc của dự án, chạy lệnh:
-```bash
-python3 main_all.py
-```
-*Lệnh này sẽ tự động khởi động đồng thời cả camera giám sát phát hiện người và máy chủ API Thermal, đồng thời điều phối luồng log in ra màn hình vô cùng trực quan.*
+Sau khi cài đặt thành công bằng script, dịch vụ sẽ chạy tự động ở nền. Bạn có thể quản lý dịch vụ bằng các lệnh sau:
 
-### Cách 2: Chạy riêng lẻ từng dịch vụ để Debug
-
-* **Chạy dịch vụ phát hiện người YOLO (TensorRT)**:
+* **Xem trạng thái hoạt động**:
   ```bash
-  python3 api_send.py
+  sudo systemctl status smart_camera.service
   ```
 
-* **Chạy dịch vụ API Thermal & Dự báo**:
+* **Xem nhật ký hoạt động thời gian thực (Real-time logs)**:
   ```bash
-  cd timeseries_service
-  ./tf_env/bin/python thermal_receiver.py
+  sudo journalctl -u smart_camera.service -f
+  ```
+
+* **Dừng dịch vụ**:
+  ```bash
+  sudo systemctl stop smart_camera.service
+  ```
+
+* **Khởi động lại dịch vụ**:
+  ```bash
+  sudo systemctl restart smart_camera.service
+  ```
+
+* **Chạy thủ công ở chế độ thử nghiệm (Foreground)**:
+  Nếu muốn dừng dịch vụ nền và chạy trực tiếp để kiểm tra log ra màn hình:
+  ```bash
+  sudo systemctl stop smart_camera.service
+  python3 main_all.py
   ```
 
 ---
