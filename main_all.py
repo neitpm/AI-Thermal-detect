@@ -11,6 +11,26 @@ YOLO_SCRIPT = os.path.join(BASE_DIR, "yolo_detect.py")
 THERMAL_SCRIPT = os.path.join(BASE_DIR, "timeseries_service", "thermal_receiver.py")
 SENDER_SCRIPT = os.path.join(BASE_DIR, "thermal_sender.py")
 
+# ==========================================
+# ENV LOADER (Zero-dependency .env parser)
+# ==========================================
+def load_dotenv():
+    dotenv_path = os.path.join(BASE_DIR, ".env")
+    if os.path.exists(dotenv_path):
+        with open(dotenv_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                parts = line.split("=", 1)
+                if len(parts) == 2:
+                    key = parts[0].strip()
+                    val = parts[1].strip().strip('"').strip("'")
+                    if key not in os.environ:
+                        os.environ[key] = val
+
+load_dotenv()
+
 processes = []
 
 def forward_output(pipe, prefix):
@@ -85,8 +105,15 @@ def main():
     # 1. Khởi động Thermal Receiver API
     print("[INIT] Khởi động Thermal Receiver API...")
     thermal_cwd = os.path.join(BASE_DIR, "timeseries_service")
+    venv_python = os.path.join(thermal_cwd, "tf_env", "bin", "python")
+    if not os.path.exists(venv_python):
+        venv_python = sys.executable
+        print(f"[INIT] Không tìm thấy tf_env, chạy Thermal Receiver bằng: {venv_python}")
+    else:
+        print(f"[INIT] Chạy Thermal Receiver bằng môi trường ảo: {venv_python}")
+        
     p_thermal = subprocess.Popen(
-        [sys.executable, "thermal_receiver.py"],
+        [venv_python, "thermal_receiver.py"],
         cwd=thermal_cwd,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,

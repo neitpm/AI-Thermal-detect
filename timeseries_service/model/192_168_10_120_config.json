@@ -5,6 +5,7 @@
     "targets": [
         "Điểm 1",
         "Điểm 2",
+        "Điểm 3",
         "Vùng 1"
     ],
     "feature_cols": [
@@ -16,6 +17,10 @@
         "Điểm 2_trend",
         "Điểm 2_seasonal",
         "Điểm 2_residual",
+        "Điểm 3",
+        "Điểm 3_trend",
+        "Điểm 3_seasonal",
+        "Điểm 3_residual",
         "Vùng 1",
         "Vùng 1_trend",
         "Vùng 1_seasonal",
@@ -24,6 +29,7 @@
     "target_cols": [
         "Điểm 1_t5",
         "Điểm 2_t5",
+        "Điểm 3_t5",
         "Vùng 1_t5"
     ]
 }

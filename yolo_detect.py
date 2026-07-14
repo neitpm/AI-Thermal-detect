@@ -14,18 +14,42 @@ from concurrent.futures import ThreadPoolExecutor
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# ==========================================
+# ENV LOADER (Zero-dependency .env parser)
+# ==========================================
+def load_dotenv():
+    dotenv_path = os.path.join(BASE_DIR, ".env")
+    if os.path.exists(dotenv_path):
+        with open(dotenv_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                parts = line.split("=", 1)
+                if len(parts) == 2:
+                    key = parts[0].strip()
+                    val = parts[1].strip().strip('"').strip("'")
+                    if key not in os.environ:
+                        os.environ[key] = val
+
+load_dotenv()
+
 # =========================
-# SOURCE CONFIG
+# CONFIG FROM ENVIRONMENT
 # =========================
-SOURCE = "rtsp://admin:Demo%402024@192.168.10.152:554/Streaming/Channels/102"
-ENGINE_PATH = "models/yolov8n.engine"
+CAMERA_IP = os.getenv("CAMERA_IP", "192.168.10.152")
+SOURCE = os.getenv("CAMERA_RTSP_URL", f"rtsp://admin:Demo%402024@{CAMERA_IP}:554/Streaming/Channels/102")
+ENGINE_PATH = os.getenv("YOLO_ENGINE_PATH", "models/yolov8n.engine")
+CONF_THRES = float(os.getenv("YOLO_CONF_THRESHOLD", "0.55"))
+
+CENTRAL_STATION_IP = os.getenv("CENTRAL_STATION_IP", "192.168.10.102")
+API_URL = os.getenv("YOLO_ALERT_API_URL", f"http://{CENTRAL_STATION_IP}:5000/api/person-detection")
 
 # =========================
 # DETECTION CONFIG
 # =========================
 INPUT_W = 640
 INPUT_H = 640
-CONF_THRES = 0.55  # Lọc nhận diện sai triệt để
 IOU_THRES = 0.45   # Giảm chồng lấn box trùng
 PERSON_CLASS_ID = 0
 SKIP_FRAMES = 2
@@ -39,8 +63,6 @@ MAX_ASPECT_RATIO = 1.20
 # =========================
 # API CONFIG
 # =========================
-API_URL = "http://192.168.10.102:5000/api/person-detection"
-CAMERA_IP = "192.168.10.152"
 MIN_API_INTERVAL = 60  # Cooldown cảnh báo tức thời (giây) để tránh gửi spam tin nhắn
 API_TIMEOUT = 5
 API_MAX_WORKERS = 1

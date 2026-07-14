@@ -14,6 +14,29 @@ from urllib.error import URLError, HTTPError
 import numpy as np
 import pandas as pd
 
+# ==========================================
+# ENV LOADER (Zero-dependency .env parser)
+# ==========================================
+def load_dotenv():
+    cwd = os.path.dirname(os.path.abspath(__file__))
+    paths = [os.path.join(cwd, ".env"), os.path.join(cwd, "..", ".env")]
+    for path in paths:
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    parts = line.split("=", 1)
+                    if len(parts) == 2:
+                        key = parts[0].strip()
+                        val = parts[1].strip().strip('"').strip("'")
+                        if key not in os.environ:
+                            os.environ[key] = val
+            break
+
+load_dotenv()
+
 app = FastAPI(title="Thermal Receiver API")
 
 SAVE_DIR = "received_data"
@@ -21,7 +44,9 @@ DATA_DIR = "data"
 RAW_HISTORY_CSV = os.path.join(DATA_DIR, "live_thermal_history.csv")
 PREDICTIONS_CSV = os.path.join(DATA_DIR, "live_predictions.csv")
 EVALUATIONS_CSV = os.path.join(DATA_DIR, "live_evaluations.csv")
-DEFAULT_PREDICTION_CALLBACK_URL = "http://192.168.10.102:8100/api/prediction"
+
+CENTRAL_STATION_IP = os.getenv("CENTRAL_STATION_IP", "192.168.10.102")
+DEFAULT_PREDICTION_CALLBACK_URL = f"http://{CENTRAL_STATION_IP}:8100/api/prediction"
 PREDICTION_CALLBACK_URL = os.getenv(
     "PREDICTION_CALLBACK_URL",
     DEFAULT_PREDICTION_CALLBACK_URL,
@@ -812,10 +837,10 @@ async def save_thermal_config(request: Request, forward: bool = True):
             json.dump(data, f, ensure_ascii=False, indent=4)
         print(f"[CONFIG] Đã nhận và lưu cấu hình điểm đo nhiệt mới cho {camera_id} vào: {config_path}")
 
-        # 1a. Forward cấu hình sang Server trung tâm (192.168.10.102:8100)
+        # 1a. Forward cấu hình sang Server trung tâm
         if forward:
             try:
-                central_url = "http://192.168.10.102:8100/config/thermal"
+                central_url = f"http://{CENTRAL_STATION_IP}:8100/config/thermal"
                 print(f"[CONFIG] Forwarding config/thermal to central server: {central_url}")
                 requests.post(central_url, json=data, timeout=5)
             except Exception as e:
@@ -889,10 +914,10 @@ async def update_forecasting_targets(request: Request, forward: bool = True):
 
         camera_id = get_camera_id(data, request)
 
-        # 2a. Forward cấu hình sang Server trung tâm (192.168.10.102:8100)
+        # 2a. Forward cấu hình sang Server trung tâm
         if forward:
             try:
-                central_url = "http://192.168.10.102:8100/api/config/update"
+                central_url = f"http://{CENTRAL_STATION_IP}:8100/api/config/update"
                 print(f"[CONFIG] Forwarding api/config/update to central server: {central_url}")
                 requests.post(central_url, json=data, timeout=5)
             except Exception as e:
