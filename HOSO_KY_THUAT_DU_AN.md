@@ -428,72 +428,58 @@ Giao diện Web Dashboard hiển thị tập trung tại Máy chủ Trung tâm b
 Lịch sử chi tiết toàn bộ các commit trong repository của dự án biên dịch hệ thống an ninh và phân tích nhiệt độ biên:
 
 *   **Commit Hash:** `f800ce8`
-    *   *Tác giả:* admin-khai <admin-khai@example.com>
     *   *Ngày thực hiện:* Sat Jun 27 15:42:01 2026 +0700
     *   *Tiêu đề:* feat: cac chuc nang hoat dong tot - 15h41 27-06-2026
     *   *Chi tiết:* Đánh giá tổng thể hiệu năng của Edge Node khi chạy đồng hành hai luồng chính (YOLOv8 và Thermal Receiver). Thực hiện tối ưu hóa bộ nhớ GPU và dọn dẹp giải phóng VRAM.
 *   **Commit Hash:** `681afe3`
-    *   *Tác giả:* admin-khai <admin-khai@example.com>
     *   *Ngày thực hiện:* Sat Jun 13 17:11:56 2026 +0700
     *   *Tiêu đề:* fix: resolve scaler shape mismatch in autotrain and improve yolo rtsp connection stability
     *   *Chi tiết:* Sửa lỗi bất tương thích kích thước bộ chuẩn hóa (shape mismatch) khi số lượng target nhiệt độ thay đổi trong tiến trình tự huấn luyện. Tối ưu hóa luồng đọc camera RTSP của YOLOv8 tránh timeout đứt mạng.
 *   **Commit Hash:** `df1c7e2`
-    *   *Tác giả:* admin-khai <admin-khai@example.com>
     *   *Ngày thực hiện:* Tue Jun 9 15:40:46 2026 +0700
     *   *Tiêu đề:* chore: add trained models, scalers, and configs to repository
     *   *Chi tiết:* Lưu trữ các tệp trọng số đã huấn luyện (`mtkan_weights.weights.h5`), bộ chuẩn hóa dữ liệu (`scaler_X.pkl`, `scaler_y.pkl`) và file cấu hình camera mặc định vào repository.
 *   **Commit Hash:** `4a3aafa`
-    *   *Tác giả:* admin-khai <admin-khai@example.com>
     *   *Ngày thực hiện:* Tue Jun 9 15:35:41 2026 +0700
     *   *Tiêu đề:* chore: add log files and telemetry data history to repository
     *   *Chi tiết:* Đưa các file ghi nhật ký hoạt động (`thermal_service.log`, `thermal_sender.log`, `system_all.log`) và dữ liệu thực tế trạm biến áp vào Git để kiểm tra offline.
 *   **Commit Hash:** `4e5c407`
-    *   *Tác giả:* admin-khai <admin-khai@example.com>
     *   *Ngày thực hiện:* Tue Jun 9 11:48:54 2026 +0700
     *   *Tiêu đề:* feat: resolve callback url dynamically based on requesting client IP
     *   *Chi tiết:* Phát triển logic tự động phân tích và giải quyết IP động của Central Station gửi yêu cầu để định tuyến URL callback phản hồi kết quả dự báo một cách linh hoạt.
 *   **Commit Hash:** `67c51f6`
-    *   *Tác giả:* admin-khai <admin-khai@example.com>
     *   *Ngày thực hiện:* Mon Jun 8 13:46:08 2026 +0700
     *   *Tiêu đề:* feat: partition raw json packet logs into camera-specific subdirectories under received_data/
     *   *Chi tiết:* Tách biệt lưu trữ log thô JSON của từng camera nhiệt theo địa chỉ IP vào các thư mục con riêng biệt để tránh ghi đè dữ liệu.
 *   **Commit Hash:** `d8505be`
-    *   *Tác giả:* admin-khai <admin-khai@example.com>
     *   *Ngày thực hiện:* Mon Jun 8 13:41:48 2026 +0700
     *   *Tiêu đề:* feat: implement per-camera partitioning for data, configurations, model weights, and scalers
     *   *Chi tiết:* Thiết lập cơ chế đa camera (multi-camera partitioning) độc lập cho toàn bộ tài nguyên: file lịch sử CSV, file cấu hình, scaler và trọng số mô hình.
 *   **Commit Hash:** `9c68d66`
-    *   *Tác giả:* admin-khai <admin-khai@example.com>
     *   *Ngày thực hiện:* Mon Jun 8 08:39:40 2026 +0700
     *   *Tiêu đề:* fix: resolve exploding predictions and add camera auto-reconnect
     *   *Chi tiết:* Sửa lỗi bùng nổ giá trị dự báo nhiệt độ do khuyết dữ liệu thông qua bộ nội suy thời gian. Tích hợp tính năng tự động kết nối lại camera khi đứt luồng RTSP.
 *   **Commit Hash:** `5620f4c`
-    *   *Tác giả:* admin-khai <admin-khai@example.com>
     *   *Ngày thực hiện:* Thu Jun 4 13:37:12 2026 +0700
     *   *Tiêu đề:* chore: update targets list configuration
     *   *Chi tiết:* Cập nhật danh sách điểm đo nhiệt độ cần giám sát (`targets`) cho các trạm biến áp.
 *   **Commit Hash:** `77dba7d`
-    *   *Tác giả:* admin-khai <admin-khai@example.com>
     *   *Ngày thực hiện:* Wed Jun 3 17:23:56 2026 +0700
     *   *Tiêu đề:* feat: stabilize thermal monitoring pipeline and implement instant alerting
     *   *Chi tiết:* Tối ưu hóa đường ống thu thập và dự báo nhiệt độ, tích hợp cảnh báo người xâm nhập tức thời với bộ khóa trạng thái chống spam. Xử lý gộp gói tin đo nhiệt độ từ camera gửi lên trong vòng 5 giây và ngăn chặn ghi dòng trống vào CSV khi targets rỗng.
 *   **Commit Hash:** `e27c6e1`
-    *   *Tác giả:* admin-khai <admin-khai@example.com>
     *   *Ngày thực hiện:* Tue Jun 2 17:02:39 2026 +0700
     *   *Tiêu đề:* Stabilize thermal forecasting, non-destructive CSV dynamic schema sync, and YOLOv8 event-based person detection MP4 recording with anti-flicker hybrid alerts
     *   *Chi tiết:* Bản cập nhật lớn ổn định tính năng dự báo nhiệt độ, cơ chế đồng bộ hóa schema CSV động không phá hủy cấu trúc cũ, ghi video sự kiện MP4 khi có người xâm nhập với bộ lọc chống rung giật.
 *   **Commit Hash:** `3378811`
-    *   *Tác giả:* admin-khai <admin-khai@example.com>
     *   *Ngày thực hiện:* Sat May 30 17:56:54 2026 +0700
     *   *Tiêu đề:* Update central server IP, uncomment YOLOv8, and add edge system script files
     *   *Chi tiết:* Cập nhật địa chỉ IP máy chủ trung tâm thành `192.168.x.102`, kích hoạt chạy module YOLOv8 và bổ sung các file script điều hành biên (`main_all.py`, `yolo_detect.py`, `thermal_sender.py`).
 *   **Commit Hash:** `db2c8c6`
-    *   *Tác giả:* admin-khai <admin-khai@example.com>
     *   *Ngày thực hiện:* Thu Apr 23 08:18:50 2026 +0700
     *   *Tiêu đề:* Add .gitignore and remove pycache
     *   *Chi tiết:* Thiết lập loại trừ file tạm, cache và các thư mục `.pycache` khỏi kho quản lý mã nguồn.
 *   **Commit Hash:** `1d56434`
-    *   *Tác giả:* admin-khai <admin-khai@example.com>
     *   *Ngày thực hiện:* Thu Apr 23 08:18:07 2026 +0700
     *   *Tiêu đề:* Initial commit
     *   *Chi tiết:* Khởi tạo khung cấu trúc thư mục dự án và các tệp tin cơ bản.
