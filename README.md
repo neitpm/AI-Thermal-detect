@@ -1,116 +1,229 @@
-# 🌟 Hệ thống Camera Biên Thông minh (Smart Camera Edge System)
+# Edge Thermal PPE Monitoring & Multi-Target Temperature Forecasting Platform
+### A Dual-Daemon Edge AI System on NVIDIA Jetson with TensorRT Acceleration, Radiometric Matrix Sampling, and Autoregressive Time-Series Forecasting
 
-Hệ thống tích hợp đa luồng hiệu năng cao chạy trên **Jetson Orin Nano**, kết hợp bộ phát hiện người chuyên dụng bằng **TensorRT** và dịch vụ dự báo chuỗi thời gian nhiệt độ tự động tối ưu **FastAPI & TensorFlow (MTKAN)**.
-
----
-
-## 🛠️ Kiến trúc hệ thống (System Architecture)
-
-Dự án bao gồm 2 dịch vụ chính chạy song song dưới sự điều phối của một **Master Daemon Control** (`main_all.py`):
-
-1. **YOLOv8n TensorRT Detector (Bộ Phát hiện Người)**:
-   - Tối ưu hóa GPU biên thông qua việc biên dịch file ONNX sang TensorRT Engine (`yolov8n.engine`) chạy ở tốc độ cực cao (~251 FPS).
-   - Thiết kế dạng chạy ngầm không màn hình (Headless Daemon), bắt giữ các luồng video RTSP bất đồng bộ và đẩy cảnh báo qua Thread Pool lên máy chủ trung tâm.
-2. **FastAPI Thermal Service (Dịch vụ Nhận dữ liệu & Dự báo Nhiệt)**:
-   - Nhận dữ liệu nhiệt độ trực tiếp qua API, lưu lịch sử tối ưu và đưa ra dự đoán trước 5 phút (Horizon = 5) bằng mạng Nơ-ron.
-   - **Tự động huấn luyện lại ngầm (Background Auto-Retraining)**: Sau mỗi 2 ngày (172.800 giây), dịch vụ tự động kích hoạt train lại mô hình trên luồng phụ độc lập.
-   - **Cập nhật nóng không gián đoạn (Zero-Downtime Hot-Swapping)**: Tự động nạp (hot-swap) trọng số mô hình mới vào RAM ngay sau khi train xong mà không cần khởi động lại server.
+[![Platform](https://img.shields.io/badge/Platform-NVIDIA%20Jetson%20Orin%20Nano%20%7C%20Jetson%20Nano-76B900.svg)](https://developer.nvidia.com/embedded/jetson-modules)
+[![Framework](https://img.shields.io/badge/Framework-TensorRT%20%7C%20Ultralytics%20YOLOv8%20%7C%20Keras%203-FF6F00.svg)](https://ultralytics.com)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg)](https://fastapi.tiangolo.com)
+[![Python](https://img.shields.io/badge/Python-3.10-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
-## 📋 Yêu cầu hệ thống (Prerequisites)
+## 1. Project Positioning & Scope
 
-* **Thiết bị**: Jetson Orin Nano (hoặc dòng Jetson tương đương).
-* **Hệ điều hành**: JetPack (5.x hoặc 6.x) đã tích hợp sẵn **CUDA**, **cuDNN**, và **TensorRT**.
-* **Python**: Phiên bản 3.10.
+> **Important Notice on Architectural Scope & Verified Artifacts:**  
+> This repository houses the **Edge AI & Time-Series Forecasting Core** for an industrial thermal monitoring ecosystem. It runs as a multi-process headless daemon on **NVIDIA Jetson** boards, ingesting dual optical/thermal streams from Hikvision bi-spectrum cameras and pushing structured alerts to an on-premise SCADA management system (**Master-Station**).  
+> 
+> **System Boundaries & Ecosystem Linkages:**
+> - **[`Get-Thermal-Jetson-nano`](https://github.com/neitpm/Get-Thermal-Jetson-nano)**: Provides embedded sensing, handling raw ISAPI HTTP Digest handshakes and decoding binary multipart P2P payloads into calibrated float32 matrices.
+> - **[`Master-Station`](https://github.com/neitpm/Master-Station)**: On-premise central station backend (C# ASP.NET Core .NET 8, SignalR) and desktop operator interface (React 18 + Electron) for electrical single-line diagrams (SLD) and multi-camera orchestration.
+> - **[`Power-Monitor`](https://github.com/neitpm/Power-Monitor)**: Dedicated desktop thick-client distribution of the Master-Station platform.
 
 ---
 
-## 🚀 Hướng dẫn cài đặt & Chạy dự án (Quick Start)
+## 2. Comparative Model & System Architecture
 
-### Bước 1: Clone dự án và truy cập thư mục gốc
-```bash
-git clone <url-cua-ban> smart_camera_edge_system
-cd smart_camera_edge_system
+The edge runtime deploys a dual-daemon topology managed by a supervisor process (`main_all.py`), separating high-frequency visual detection from periodic thermal forecasting:
+
+```mermaid
+flowchart TD
+    subgraph Sensor_Layer["1. HARDWARE SENSING LAYER"]
+        CAM["Hikvision Bi-Spectrum Camera (192.168.10.152)<br/>• Optical Stream: RTSP 1080p (CH 102)<br/>• Thermal Sensor: ISAPI P2P Multipart (CH 2)"]
+    end
+
+    subgraph Edge_Daemon["2. JETSON EDGE RUNTIME (AI-Thermal-detect)"]
+        SUPERVISOR["Process Supervisor (main_all.py)<br/>Signal Handling & Subprocess Pipe Relay"]
+
+        subgraph Vision_Daemon["Vision Service (yolo_detect.py)"]
+            PRE_V["Bilinear Resize (640x640)<br/>RGB Normalization [0, 1]"]
+            TRT_DET["Ultralytics YOLOv8n TensorRT FP16 Engine<br/>Input: [1, 3, 640, 640] -> Output: [1, 300, 6]<br/>End-to-End NMS (Class 0: uniform)"]
+            FILTER_V["Geometric Heuristic Filter & 60s Cooldown"]
+        end
+
+        subgraph Thermal_Daemon["Time-Series Service (timeseries_service :8080)"]
+            MAT_DEC["ISAPI P2P Byte Decoding<br/>384x288 float32 Radiometric Matrix"]
+            SAMP["Target Point/Zone Coordinate Sampling<br/>Points P1-P9 & Zones V1-V2"]
+            HIST["Self-Rotating Buffer (live_thermal_history.csv)"]
+            
+            subgraph Models["Forecasting Engine"]
+                PROD_LR["Production Serving: Autoregressive Linear Regression<br/>5 Lags -> 5-min Horizon Prediction (linear_reg.pkl)<br/>Background Auto-Retraining Thread"]
+                EXP_KAN["Experimental Benchmark: MTKAN + STL (Keras 3)<br/>24 Features -> 6 Output Targets (mtkan_model.keras)"]
+            end
+        end
+    end
+
+    subgraph Station_Layer["3. STATION INTEGRATION (Master-Station)"]
+        BACKEND["StationOS Backend API (C# .NET 8 :5000)<br/>REST Ingestion & SignalR Realtime Hub"]
+        UI["React 18 / Electron Desktop Dashboard"]
+    end
+
+    CAM -->|"RTSP H.264"| PRE_V
+    PRE_V --> TRT_DET
+    TRT_DET --> FILTER_V
+    FILTER_V -->|"POST /api/person-detection"| BACKEND
+
+    CAM -->|"HTTP Digest ISAPI P2P"| MAT_DEC
+    MAT_DEC --> SAMP
+    SAMP --> HIST
+    HIST --> PROD_LR
+    HIST -.-> EXP_KAN
+    PROD_LR -->|"POST Callback /api/prediction"| BACKEND
+
+    BACKEND --> UI
 ```
 
-### Bước 2: Cấu hình Môi trường ảo cho Dịch vụ Thermal (TensorFlow)
-Dịch vụ thermal chạy trong môi trường ảo chuyên dụng `tf_env` đặt trong thư mục `timeseries_service` để đảm bảo không bị xung đột thư viện:
+### High-Level Architectural Flow
+![End-to-End Pipeline](docs/figures/1_end_to_end_pipeline.png)
 
+---
+
+## 3. Detailed Subsystem Pipelines
+
+### A. PPE / Uniform Detection Pipeline (YOLOv8n TensorRT)
+
+The vision detection service operates headlessly without GUI dependencies to maximize throughput on Jetson hardware:
+
+![Thermal Detection Pipeline](docs/figures/2_thermal_detection_pipeline.png)
+
+- **Model Specification:** **Ultralytics YOLOv8n** (`DetectionModel`).
+  - *Checkpoint Evidence:* Verified via `models/best.onnx` metadata (`version: 8.4.38`, `imgsz: [640, 640]`, `stride: 32`, `names: {0: 'uniform'}`, `end2end: True`).
+- **Inference Runtime:** Precompiled **TensorRT FP16 Engine** (`models/yolov8n.engine`, `models/best.engine`).
+- **Input Dimensions:** `[1, 3, 640, 640]` float32 contiguous array in RGB format.
+- **Output Tensor:** `[1, 300, 6]`, where each anchor prediction represents:
+  $$\text{Box} = \left[ x_1, y_1, x_2, y_2, \text{confidence}, \text{class\_id} \right]$$
+  *(Note: Output includes embedded hardware-accelerated NMS filtering; `class_id = 0` corresponds to verified dataset class `uniform`).*
+- **False-Positive Mitigation:**
+  - Confidence thresholding: $\text{conf} \ge 0.55$.
+  - Spatial aspect ratio constraint: $0.20 \le \frac{W}{H} \le 1.20$.
+  - Minimum area filter: $W \ge 20\,\text{px}$, $H \ge 40\,\text{px}$, $\text{Area} \ge 800\,\text{px}^2$.
+  - Alert Cooldown: 60-second minimum interval per camera stream to prevent redundant alerts.
+
+---
+
+### B. Thermal Temperature Time-Series Forecasting Pipeline
+
+Rather than relying solely on scalar thresholds, the system extracts dense radiometric temperature matrices and models future thermal trends:
+
+![Timeseries Forecasting Pipeline](docs/figures/3_timeseries_forecasting_pipeline.png)
+
+1. **Radiometric Extraction:**
+   - Raw binary buffers are polled from `/ISAPI/Thermal/channels/2/thermometry/jpegPicWithAppendData`.
+   - The embedded binary chunk is parsed via `np.frombuffer(raw_data[:p2p_len], dtype=np.float32)` and reshaped to **$(288, 384)$**.
+   - Target coordinates configured via `thermal_points.json` are mapped onto the matrix to query true Celsius readings.
+2. **Dynamic History Schema:**
+   - Samples are appended to `live_thermal_history.csv`.
+   - The service automatically detects newly registered measurement zones and expands CSV headers without historical data loss.
+
+---
+
+### C. Production vs. Experimental Forecasting Models
+
+The system maintains a clean boundary between the lightweight production serving model and the experimental deep learning architecture:
+
+![MTKAN Architecture](docs/figures/4_mtkan_architecture.png)
+
+#### 1. Production Serving Model: Autoregressive Linear Regression (`linear_reg.pkl`)
+- **Framework:** Scikit-Learn `LinearRegression` (stored via `joblib`).
+- **Design Philosophy:** Low-latency, deterministic execution requiring minimal memory on edge devices.
+- **Input Space:** Sliding window of 5 consecutive historical observations ($t-4, t-3, t-2, t-1, t$).
+- **Output:** Scalar temperature prediction at forecast horizon $t + 5\text{ minutes}$.
+- **Autonomous Retraining:** `train.py` executes in a background thread every 2 days (172,800 seconds). Once retrained, weights are hot-swapped into RAM without API downtime.
+
+#### 2. Experimental Benchmark: MTKAN (Temporal Kolmogorov-Arnold Network) (`mtkan_model.keras`)
+- **Framework:** TensorFlow / Keras 3.14 (`Sequential`).
+- **Feature Engineering:** STL (Seasonal-Trend decomposition using LOESS) splits each target series into **Trend**, **Seasonal**, and **Residual** components, expanding 6 raw series into a **24-dimensional feature vector**.
+- **Network Topology:**
+  $$\text{Input}(5, 24) \longrightarrow \text{TKAN}(64, \text{return\_seq}=\text{True}) \longrightarrow \text{Dropout}(0.1) \longrightarrow \text{TKAN}(32) \longrightarrow \text{Dense}(32, \text{ReLU}) \longrightarrow \text{Dense}(6)$$
+- **Role:** Maintained as an offline research benchmark for complex non-linear seasonal thermal phenomena.
+
+---
+
+## 4. Empirical Evaluation & Verification Matrix
+
+![Model Comparison](docs/figures/6_model_comparison.png)
+
+### Verified Offline Metrics for MTKAN
+Evaluation metrics recorded on test split (`timeseries_service/model/metrics_test.csv`):
+
+| Target Identifier | Mean Absolute Error (MAE) | Root Mean Squared Error (RMSE) | Coefficient of Determination ($R^2$) |
+| :--- | :---: | :---: | :---: |
+| **`ID_1`** | **0.478°C** | 0.588°C | 0.9694 |
+| **`ID_2`** | **0.400°C** | 0.502°C | 0.9794 |
+| **`ID_3`** | **0.508°C** | 0.649°C | 0.9551 |
+| **`ID_4`** | **0.560°C** | 0.668°C | 0.9203 |
+| **`ID_5`** | **0.435°C** | 0.554°C | 0.9700 |
+| **`ID_6`** | **0.377°C** | 0.471°C | 0.9619 |
+| **Average** | **0.460°C** | **0.572°C** | **0.9593** |
+
+> [!NOTE]  
+> **Detection Metrics Disclosure:**  
+> While precompiled weights (`best.pt`, `best.onnx`, `yolov8n.engine`) are provided and verified, the original training dataset (`uniform-1`) and validation logs are not committed within this repository.
+
+---
+
+## 5. Edge-to-Station Integration Topology
+
+![Edge to Station Architecture](docs/figures/5_edge_to_station_architecture.png)
+
+### Communication Contracts
+1. **Safety Violation Alert:**
+   - `POST http://<master_ip>:5000/api/person-detection`
+   - Payload: `{"timestamp": "...", "camera_ip": "192.168.10.152", "person_count": 1, "boxes": [{"x1": 100, "y1": 120, "x2": 250, "y2": 400, "score": 0.89}]}`
+2. **Thermal Forecast Ingestion:**
+   - `POST http://<master_ip>:8100/api/prediction`
+   - Payload: `{"issued_at": "...", "forecast_timestamp": "...", "ID_1_pred": 42.5, "ID_2_pred": 38.1, ...}`
+
+---
+
+## 6. Reproducible Inference & Quick Start
+
+### A. Environment Setup
 ```bash
+# Clone repository
+git clone https://github.com/neitpm/AI-Thermal-detect.git
+cd AI-Thermal-detect
+
+# Install Vision / TensorRT runtime dependencies
+pip install opencv-python requests pycuda onnxruntime
+
+# Set up isolated virtual environment for forecasting engine
 cd timeseries_service
-# Tạo môi trường ảo
 python3 -m venv tf_env
-# Kích hoạt môi trường ảo
 source tf_env/bin/activate
-
-# Nâng cấp pip và cài đặt thư viện
-pip install --upgrade pip
 pip install -r ../requirements.txt
-
-# Cài đặt TensorFlow tương thích với Jetson (Nên dùng bản do NVIDIA cung cấp)
-# Hoặc cài đặt bản chuẩn từ pip nếu chạy trên PC thông thường:
+# Install Jetson-compatible TensorFlow / Keras 3
 pip install tensorflow
-
 deactivate
 cd ..
 ```
 
-### Bước 3: Cài đặt thư viện cho Bộ phát hiện người (YOLO TensorRT)
-Ở thư mục gốc của dự án, cài đặt các thư viện phục vụ xử lý luồng camera và TensorRT:
+### B. Verification Smoke Tests
 
-```bash
-# Cài đặt các thư viện cơ bản
-pip install opencv-python requests pycuda
+#### 1. Validate ONNX Inference via Python
+```python
+import onnxruntime as ort
+import numpy as np
+
+session = ort.InferenceSession("models/best.onnx")
+dummy_input = np.random.randn(1, 3, 640, 640).astype(np.float32)
+outputs = session.run(None, {"images": dummy_input})
+print("ONNX Output Shape:", outputs[0].shape)  # Expected: (1, 300, 6)
 ```
 
----
-
-## ⚙️ Cấu hình Hệ thống (Configuration)
-
-### 1. Cấu hình Camera RTSP & API Endpoint
-Chỉnh sửa file `api_send.py` hoặc `yolo_detect.py` để thay đổi camera nguồn và URL đích:
-* **`SOURCE`**: Đường dẫn RTSP của camera IP của bạn.
-* **`API_URL`**: Địa chỉ server đích nhận cảnh báo phát hiện người.
-* **`CONF_THRES`**: Ngưỡng tự tin phát hiện người (Mặc định: 0.55).
-
-### 2. Cấu hình các điểm nhiệt độ giám sát
-Chỉnh sửa file cấu hình tại `timeseries_service/model/config.json` để thay đổi danh sách các điểm nhiệt độ camera đo được:
-* **`targets`**: Danh sách ID các điểm nhiệt (Mặc định: `ID_1` đến `ID_6`).
-
----
-
-## 🎯 Chạy ứng dụng (Execution)
-
-### Cách 1: Chạy song song cả hai dịch vụ bằng Master Daemon (Khuyên dùng)
-Tại thư mục gốc của dự án, chạy lệnh:
+#### 2. Execute Full Edge Daemon
 ```bash
+# Start dual daemon (Vision Detector + Thermal Forecasting Service)
 python3 main_all.py
+
+# Or run thermal forecasting service only
+python3 main_all.py --thermal-only
 ```
-*Lệnh này sẽ tự động khởi động đồng thời cả camera giám sát phát hiện người và máy chủ API Thermal, đồng thời điều phối luồng log in ra màn hình vô cùng trực quan.*
-
-### Cách 2: Chạy riêng lẻ từng dịch vụ để Debug
-
-* **Chạy dịch vụ phát hiện người YOLO (TensorRT)**:
-  ```bash
-  python3 api_send.py
-  ```
-
-* **Chạy dịch vụ API Thermal & Dự báo**:
-  ```bash
-  cd timeseries_service
-  ./tf_env/bin/python thermal_receiver.py
-  ```
 
 ---
 
-## ⚠️ Lưu ý quan trọng khi thay đổi điểm nhiệt độ
+## 7. Known System Limitations
 
-Khi người dùng **thêm điểm nhiệt mới** hoặc **đổi tên/vị trí điểm nhiệt** trên camera:
-1. **Cập nhật Cấu hình**: Truy cập file `timeseries_service/model/config.json` và cập nhật lại danh sách điểm nhiệt mới trong mục `"targets"`.
-2. **Huấn luyện lại**: Do kích thước ma trận đầu vào của mô hình AI thay đổi, bạn cần thực hiện huấn luyện lại mô hình từ đầu bằng lệnh:
-   ```bash
-   cd timeseries_service
-   ./tf_env/bin/python train.py
-   ```
-   *Sau khi chương trình train xong và tạo ra trọng số mới, dịch vụ sẽ tự động nạp nóng và hoạt động ổn định bình thường.*
+1. **Training Dataset Availability:** Original images and bounding box annotations for the uniform detection model reside on private external storage and are not bundled in this git history.
+2. **Model Serving Distinction:** The live production service relies on autoregressive Linear Regression (`linear_reg.pkl`) for minimal latency; MTKAN remains an experimental benchmark module.
+3. **Hardware-Specific Benchmarking:** Framerates depend on Jetson power profiles (`nvpmodel -m 0` vs `10W/15W` modes). Official hardware execution reports require in-situ profiling.
+4. **Thermal Scope:** The forecasting pipeline predicts continuous temperature trajectories; operational threshold anomaly scoring is handled downstream by Master-Station rule engines.
