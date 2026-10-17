@@ -46,7 +46,7 @@ flowchart TD
             HIST["Self-Rotating Buffer (live_thermal_history.csv)"]
             
             subgraph Models["Forecasting Engine"]
-                PROD_LR["Production Serving: Autoregressive Linear Regression<br/>5 Lags -> 5-min Horizon Prediction (linear_reg.pkl)<br/>Background Auto-Retraining Thread"]
+                PROD_LR["Production Serving: Autoregressive Linear Regression<br/>5 Lags -> 5-min Horizon Prediction (linear_reg.pkl)<br/>Implemented Support for Autonomous Retraining"]
                 EXP_KAN["Experimental Benchmark: MTKAN + STL (Keras 3)<br/>24 Features -> 6 Output Targets (mtkan_model.keras)"]
             end
         end
@@ -72,26 +72,50 @@ flowchart TD
     BACKEND --> UI
 ```
 
-### High-Level Architectural Flow
-![End-to-End Pipeline](docs/figures/1_end_to_end_pipeline.png)
+---
+
+## 3. High-Resolution 3D Volumetric Architecture Figures
+
+Below is the complete suite of isometric 3D volumetric tensor block diagrams illustrating layer boundaries, data formats, and mathematical tensor shapes:
+
+#### Figure 1: 3D Volumetric End-to-End Thermal Pipeline
+*Volumetric tensor progression from dual-sensor camera capture, through Jetson edge daemons, to the Master Station SCADA server.*
+![End to End Thermal Pipeline](docs/figures/1_end_to_end_thermal_pipeline.png)
+
+#### Figure 2: YOLOv8n TensorRT FP16 Detection Architecture
+*RTSP H.264 ingestion, bilinear RGB normalization, TensorRT FP16 engine execution, hardware-accelerated End-to-End NMS, and 60-second cooldown dispatching.*
+![YOLOv8n TensorRT FP16](docs/figures/2_yolov8n_tensor_rt.png)
+
+#### Figure 3: ISAPI P2P Radiometric Temperature Matrix Extraction
+*MIME boundary demuxing, raw byte parsing into calibrated 384×288 float32 Celsius grids, and normalized coordinate target sampling.*
+![Thermal Matrix Pipeline](docs/figures/3_thermal_matrix_pipeline.png)
+
+#### Figure 4: Autoregressive Multi-Target Linear Regression Forecaster
+*Live production serving architecture: 5-lag historical sliding window, multi-target ordinary least squares regression, and 5-minute future horizon estimation.*
+![Linear Regression Forecaster](docs/figures/4_linear_regression_forecaster.png)
+
+#### Figure 5: Experimental MTKAN Neural Network Architecture
+*Detailed layer topology of `mtkan_model.keras` (Keras 3.14): STL decomposition features, dual TKAN recurrent spline layers, and multi-target output projection.*
+![MTKAN Architecture](docs/figures/5_mtkan_architecture.png)
+
+#### Figure 6: System Model Role & Specification Comparison
+*Direct artifact verification matrix comparing vision detection, live serving regression, and the experimental temporal KAN research model.*
+![Model Comparison](docs/figures/6_model_comparison.png)
 
 ---
 
-## 3. Detailed Subsystem Pipelines
+## 4. Subsystem Pipelines & Model Specifications
 
 ### A. PPE / Uniform Detection Pipeline (YOLOv8n TensorRT)
 
 The vision detection service operates headlessly without GUI dependencies to maximize throughput on Jetson hardware:
-
-![Thermal Detection Pipeline](docs/figures/2_thermal_detection_pipeline.png)
-
 - **Model Specification:** **Ultralytics YOLOv8n** (`DetectionModel`).
   - *Checkpoint Evidence:* Verified via `models/best.onnx` metadata (`version: 8.4.38`, `imgsz: [640, 640]`, `stride: 32`, `names: {0: 'uniform'}`, `end2end: True`).
 - **Inference Runtime:** Precompiled **TensorRT FP16 Engine** (`models/yolov8n.engine`, `models/best.engine`).
 - **Input Dimensions:** `[1, 3, 640, 640]` float32 contiguous array in RGB format.
 - **Output Tensor:** `[1, 300, 6]`, where each anchor prediction represents:
   $$\text{Box} = \left[ x_1, y_1, x_2, y_2, \text{confidence}, \text{class\_id} \right]$$
-  *(Note: Output includes embedded hardware-accelerated NMS filtering; `class_id = 0` corresponds to verified dataset class `uniform`).*
+  *(Output includes embedded hardware-accelerated NMS filtering; `class_id = 0` corresponds to verified dataset class `uniform`).*
 - **False-Positive Mitigation:**
   - Confidence thresholding: $\text{conf} \ge 0.55$.
   - Spatial aspect ratio constraint: $0.20 \le \frac{W}{H} \le 1.20$.
@@ -103,9 +127,6 @@ The vision detection service operates headlessly without GUI dependencies to max
 ### B. Thermal Temperature Time-Series Forecasting Pipeline
 
 Rather than relying solely on scalar thresholds, the system extracts dense radiometric temperature matrices and models future thermal trends:
-
-![Timeseries Forecasting Pipeline](docs/figures/3_timeseries_forecasting_pipeline.png)
-
 1. **Radiometric Extraction:**
    - Raw binary buffers are polled from `/ISAPI/Thermal/channels/2/thermometry/jpegPicWithAppendData`.
    - The embedded binary chunk is parsed via `np.frombuffer(raw_data[:p2p_len], dtype=np.float32)` and reshaped to **$(288, 384)$**.
@@ -118,16 +139,12 @@ Rather than relying solely on scalar thresholds, the system extracts dense radio
 
 ### C. Production vs. Experimental Forecasting Models
 
-The system maintains a clean boundary between the lightweight production serving model and the experimental deep learning architecture:
-
-![MTKAN Architecture](docs/figures/4_mtkan_architecture.png)
-
 #### 1. Production Serving Model: Autoregressive Linear Regression (`linear_reg.pkl`)
 - **Framework:** Scikit-Learn `LinearRegression` (stored via `joblib`).
 - **Design Philosophy:** Low-latency, deterministic execution requiring minimal memory on edge devices.
 - **Input Space:** Sliding window of 5 consecutive historical observations ($t-4, t-3, t-2, t-1, t$).
 - **Output:** Scalar temperature prediction at forecast horizon $t + 5\text{ minutes}$.
-- **Autonomous Retraining:** `train.py` executes in a background thread every 2 days (172,800 seconds). Once retrained, weights are hot-swapped into RAM without API downtime.
+- **Autonomous Retraining Support:** `train.py` contains support for background execution every 2 days (172,800 seconds). Once retrained, weights can be hot-swapped into RAM without API downtime.
 
 #### 2. Experimental Benchmark: MTKAN (Temporal Kolmogorov-Arnold Network) (`mtkan_model.keras`)
 - **Framework:** TensorFlow / Keras 3.14 (`Sequential`).
@@ -138,11 +155,9 @@ The system maintains a clean boundary between the lightweight production serving
 
 ---
 
-## 4. Empirical Evaluation & Verification Matrix
+## 5. Empirical Evaluation & Verification Matrix
 
-![Model Comparison](docs/figures/6_model_comparison.png)
-
-### Verified Offline Metrics for MTKAN
+### Reported Test Metrics for MTKAN (from `metrics_test.csv`)
 Evaluation metrics recorded on test split (`timeseries_service/model/metrics_test.csv`):
 
 | Target Identifier | Mean Absolute Error (MAE) | Root Mean Squared Error (RMSE) | Coefficient of Determination ($R^2$) |
@@ -156,14 +171,12 @@ Evaluation metrics recorded on test split (`timeseries_service/model/metrics_tes
 | **Average** | **0.460°C** | **0.572°C** | **0.9593** |
 
 > [!NOTE]  
-> **Detection Metrics Disclosure:**  
-> While precompiled weights (`best.pt`, `best.onnx`, `yolov8n.engine`) are provided and verified, the original training dataset (`uniform-1`) and validation logs are not committed within this repository.
+> **Detection Checkpoint Disclosure:**  
+> Detection checkpoint is included (`best.pt`, `best.onnx`, `yolov8n.engine`), but the original training dataset and official validation logs are not included in this repository.
 
 ---
 
-## 5. Edge-to-Station Integration Topology
-
-![Edge to Station Architecture](docs/figures/5_edge_to_station_architecture.png)
+## 6. Edge-to-Station Integration Topology
 
 ### Communication Contracts
 1. **Safety Violation Alert:**
@@ -175,7 +188,7 @@ Evaluation metrics recorded on test split (`timeseries_service/model/metrics_tes
 
 ---
 
-## 6. Reproducible Inference & Quick Start
+## 7. Reproducible Inference & Quick Start
 
 ### A. Environment Setup
 ```bash
@@ -221,9 +234,8 @@ python3 main_all.py --thermal-only
 
 ---
 
-## 7. Known System Limitations
+## 8. Limitations & Scope Disclosure
 
-1. **Training Dataset Availability:** Original images and bounding box annotations for the uniform detection model reside on private external storage and are not bundled in this git history.
-2. **Model Serving Distinction:** The live production service relies on autoregressive Linear Regression (`linear_reg.pkl`) for minimal latency; MTKAN remains an experimental benchmark module.
-3. **Hardware-Specific Benchmarking:** Framerates depend on Jetson power profiles (`nvpmodel -m 0` vs `10W/15W` modes). Official hardware execution reports require in-situ profiling.
-4. **Thermal Scope:** The forecasting pipeline predicts continuous temperature trajectories; operational threshold anomaly scoring is handled downstream by Master-Station rule engines.
+1. **Detection Dataset & Benchmarking:** Detection checkpoint is included, but the original training dataset and official validation logs are not included in this repository. Target framerates vary by hardware configuration and power modes (`nvpmodel`).
+2. **Model Roles:** Production serving uses autoregressive Linear Regression (`linear_reg.pkl`) for minimal latency; MTKAN represents an experimental benchmark model.
+3. **Thermal Scope:** The forecasting pipeline predicts continuous temperature trajectories; operational threshold anomaly scoring is handled downstream by Master-Station rule engines.

@@ -1,295 +1,367 @@
 """
 scripts/visualize_architecture.py
-Generates 6 publication-quality, 300 DPI architecture and workflow figures:
-1. docs/figures/1_end_to_end_pipeline.png
-2. docs/figures/2_thermal_detection_pipeline.png
-3. docs/figures/3_timeseries_forecasting_pipeline.png
-4. docs/figures/4_mtkan_architecture.png
-5. docs/figures/5_edge_to_station_architecture.png
+Generates high-resolution 3D volumetric tensor block diagrams for AI-Thermal-detect:
+1. docs/figures/1_end_to_end_thermal_pipeline.png
+2. docs/figures/2_yolov8n_tensor_rt.png
+3. docs/figures/3_thermal_matrix_pipeline.png
+4. docs/figures/4_linear_regression_forecaster.png
+5. docs/figures/5_mtkan_architecture.png
 6. docs/figures/6_model_comparison.png
 
-Rules:
-- High contrast, elegant color scheme.
-- No overlapping text.
-- Verified components strictly aligned with code and checkpoints.
+Canvas: 16x10 inches, 300 DPI.
+Isometric 3D volumetric tensor blocks with distinct front, top, and right facets.
 """
 
-import os
 from pathlib import Path
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
+from matplotlib.patches import Polygon, Rectangle
 import numpy as np
 
 OUTPUT_DIR = Path(__file__).resolve().parent.parent / "docs" / "figures"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-# Common styling helpers
-FONT_FAMILY = "sans-serif"
-plt.rcParams["font.sans-serif"] = ["DejaVu Sans", "Arial", "Helvetica"]
-plt.rcParams["axes.edgecolor"] = "#CBD5E1"
-plt.rcParams["axes.linewidth"] = 0.8
+# Color themes: [Front, Top, Right]
+THEMES = {
+    "camera": ["#0284C7", "#38BDF8", "#0369A1"],      # Cyan / Sky
+    "preprocess": ["#475569", "#94A3B8", "#334155"],  # Slate Gray
+    "backbone": ["#D97706", "#FBBF24", "#B45309"],    # Amber / Orange
+    "fusion": ["#7C3AED", "#A78BFA", "#6D28D9"],      # Purple
+    "detector": ["#DC2626", "#F87171", "#B91C1C"],    # Crimson Red
+    "forecast": ["#059669", "#34D399", "#047857"],    # Emerald Green
+    "backend": ["#4F46E5", "#818CF8", "#3730A3"],     # Indigo
+    "ui": ["#DB2777", "#F472B6", "#9D174D"],          # Rose / Pink
+    "dark_bg": "#0B1120",
+    "card_bg": "#1E293B",
+    "card_border": "#334155",
+    "text_white": "#F8FAFC",
+    "text_muted": "#94A3B8",
+    "text_yellow": "#FEF08A"
+}
 
-def draw_rounded_box(ax, x, y, w, h, title, subtitle="", color="#FFFFFF", border="#334155", title_color="#0F172A", sub_color="#475569", title_size=10, sub_size=8, pad=0.08):
-    rect = patches.FancyBboxPatch(
-        (x, y), w, h,
-        boxstyle=f"round,pad={pad},rounding_size=0.12",
-        facecolor=color, edgecolor=border, linewidth=1.4, zorder=2
-    )
-    ax.add_patch(rect)
-    if subtitle:
-        ax.text(x + w / 2, y + h * 0.68, title, fontsize=title_size, fontweight="bold", ha="center", va="center", color=title_color, family=FONT_FAMILY, zorder=3)
-        ax.text(x + w / 2, y + h * 0.32, subtitle, fontsize=sub_size, ha="center", va="center", color=sub_color, multialignment="center", family=FONT_FAMILY, zorder=3)
-    else:
-        ax.text(x + w / 2, y + h * 0.5, title, fontsize=title_size, fontweight="bold", ha="center", va="center", color=title_color, family=FONT_FAMILY, zorder=3)
+def draw_3d_block(ax, x, y, w, h, depth=0.35, theme="camera", label="", sublabel="", tensor_shape="", desc="", desc_pos="bottom"):
+    """
+    Draw a volumetric 3D isometric block with distinct front, top, and right facets.
+    x, y: bottom-left coordinates of front face
+    w, h: width and height of front face
+    depth: isometric projection offset
+    """
+    front_c, top_c, side_c = THEMES[theme]
+    dx = depth * 0.7
+    dy = depth * 0.7
 
-def draw_arrow(ax, x1, y1, x2, y2, label="", color="#475569", lw=1.5, label_pos=0.5, label_offset=0.22):
+    # 1. Right Side facet
+    side_pts = [
+        [x + w, y],
+        [x + w + dx, y + dy],
+        [x + w + dx, y + h + dy],
+        [x + w, y + h]
+    ]
+    ax.add_patch(Polygon(side_pts, closed=True, facecolor=side_c, edgecolor="#0F172A", lw=1.2, zorder=2))
+
+    # 2. Top facet
+    top_pts = [
+        [x, y + h],
+        [x + dx, y + h + dy],
+        [x + w + dx, y + h + dy],
+        [x + w, y + h]
+    ]
+    ax.add_patch(Polygon(top_pts, closed=True, facecolor=top_c, edgecolor="#0F172A", lw=1.2, zorder=2))
+
+    # 3. Front facet
+    front_pts = [
+        [x, y],
+        [x + w, y],
+        [x + w, y + h],
+        [x, y + h]
+    ]
+    ax.add_patch(Polygon(front_pts, closed=True, facecolor=front_c, edgecolor="#0F172A", lw=1.2, zorder=3))
+
+    # Typography inside front face
+    cx = x + w / 2.0
+    cy = y + h / 2.0
+
+    if label:
+        ax.text(cx, cy + h * 0.22, label, ha="center", va="center", color=THEMES["text_white"],
+                fontsize=9.5, fontweight="bold", zorder=4)
+    if sublabel:
+        ax.text(cx, cy + h * 0.02, sublabel, ha="center", va="center", color="#F1F5F9",
+                fontsize=8.0, zorder=4)
+    if tensor_shape:
+        ax.text(cx, cy - h * 0.22, tensor_shape, ha="center", va="center", color=THEMES["text_yellow"],
+                fontsize=8.0, fontweight="bold", family="monospace", zorder=4)
+
+    if desc:
+        if desc_pos == "bottom":
+            ax.text(cx + dx/2, y - 0.35, desc, ha="center", va="top", color=THEMES["text_muted"],
+                    fontsize=7.8, zorder=4)
+        else:
+            ax.text(cx + dx/2, y + h + dy + 0.35, desc, ha="center", va="bottom", color=THEMES["text_muted"],
+                    fontsize=7.8, zorder=4)
+
+def draw_3d_arrow(ax, x1, y1, x2, y2, color="#38BDF8", text="", text_offset_y=0.25):
+    """Draw a clean directional connection arrow with optional text badge."""
     ax.annotate(
         "", xy=(x2, y2), xytext=(x1, y1),
-        arrowprops=dict(facecolor=color, edgecolor=color, width=lw, headwidth=6, headlength=7, shrink=0.05),
-        zorder=4
+        arrowprops=dict(facecolor=color, edgecolor=color, width=1.8, headwidth=6, headlength=7, shrink=0.06),
+        zorder=5
     )
-    if label:
-        lx = x1 + (x2 - x1) * label_pos
-        ly = y1 + (y2 - y1) * label_pos + label_offset
-        ax.text(lx, ly, label, fontsize=7.5, fontweight="bold", ha="center", va="center", color="#1E293B",
-                bbox=dict(boxstyle="round,pad=0.2", facecolor="#FFFFFF", edgecolor="#CBD5E1", alpha=0.95), zorder=5)
+    if text:
+        mid_x = (x1 + x2) / 2.0
+        mid_y = (y1 + y2) / 2.0 + text_offset_y
+        ax.text(mid_x, mid_y, text, ha="center", va="center", color="#FFFFFF",
+                fontsize=7.5, fontweight="bold",
+                bbox=dict(boxstyle="round,pad=0.2", facecolor=THEMES["card_bg"], edgecolor=THEMES["card_border"], alpha=0.95),
+                zorder=6)
 
 
 # ==============================================================================
-# Figure 1: End-to-End Pipeline
+# Figure 1: 3D End-to-End Thermal Pipeline
 # ==============================================================================
 def generate_fig1():
-    fig, ax = plt.subplots(figsize=(13, 8), dpi=300)
-    ax.set_xlim(0, 13)
-    ax.set_ylim(0, 8)
+    fig, ax = plt.subplots(figsize=(16, 10), dpi=300)
+    fig.patch.set_facecolor(THEMES["dark_bg"])
+    ax.set_facecolor(THEMES["dark_bg"])
+    ax.set_xlim(-0.5, 16.5)
+    ax.set_ylim(-0.5, 9.5)
     ax.axis("off")
 
-    ax.text(6.5, 7.6, "1. END-TO-END THERMAL & VISUAL MONITORING PIPELINE", fontsize=14, fontweight="bold", ha="center", color="#0F172A")
-    ax.text(6.5, 7.25, "Hikvision Bi-Spectrum Sensor -> NVIDIA Jetson Edge Node -> Master Station Central Backend", fontsize=8.5, ha="center", color="#64748B")
+    ax.text(8.0, 8.8, "End-to-End Edge AI Thermal Monitoring Pipeline", ha="center", va="center",
+            color=THEMES["text_white"], fontsize=18, fontweight="bold")
+    ax.text(8.0, 8.35, "Hikvision Bi-Spectrum Sensor -> Jetson Edge Node (YOLOv8n TRT + Forecasting) -> Master Station SCADA",
+            ha="center", va="center", color=THEMES["text_muted"], fontsize=10.5)
 
-    # Sensor
-    draw_rounded_box(ax, 0.6, 5.0, 3.2, 1.6, "Hikvision Bi-Spectrum Camera", "IP: 192.168.10.152\nOptical RTSP: CH 102 (H.264)\nThermal ISAPI: CH 2 (P2P Multipart)", color="#E0F2FE", border="#0284C7")
+    # 1. Camera Node
+    draw_3d_block(ax, 0.4, 4.2, 2.2, 2.6, depth=0.4, theme="camera",
+                  label="Bi-Spectrum Cam", sublabel="Hikvision 152", tensor_shape="Dual Sensor",
+                  desc="Optical CH102 (H.264)\nThermal CH2 (P2P)")
 
-    # Edge Node Container
-    edge_bg = patches.FancyBboxPatch((4.3, 0.8), 4.8, 6.0, boxstyle="round,pad=0.15,rounding_size=0.15", facecolor="#F8FAFC", edgecolor="#94A3B8", linewidth=1.5, linestyle="--")
-    ax.add_patch(edge_bg)
-    ax.text(6.7, 6.5, "NVIDIA Jetson Edge Node (AI-Thermal-detect)", fontsize=10.5, fontweight="bold", ha="center", color="#0369A1")
+    # 2. Jetson Ingestion
+    draw_3d_block(ax, 3.5, 4.2, 2.3, 2.6, depth=0.4, theme="preprocess",
+                  label="Jetson Daemon", sublabel="main_all.py", tensor_shape="Supervisor",
+                  desc="Threaded frame queue\nSubprocess pipe relay")
 
-    # Inside Edge Node
-    draw_rounded_box(ax, 4.6, 4.9, 4.2, 1.2, "Headless Daemon Orchestrator", "main_all.py | Signal handling\nProcess supervisor & subprocess pipe relay", color="#FFFFFF", border="#64748B")
-    draw_rounded_box(ax, 4.6, 3.2, 4.2, 1.3, "Thermal PPE/Uniform Detection", "yolo_detect.py | TensorRT FP16\nInput: [1, 3, 640, 640] -> Output: [1, 300, 6]\nThreshold: 0.55 | 60s Alert Cooldown", color="#FEF3C7", border="#D97706")
-    draw_rounded_box(ax, 4.6, 1.2, 4.2, 1.6, "Thermal Time-Series Service", "FastAPI :8080 | ISAPI Matrix Extract\nServing Model: Autoregressive Linear Regression (Lags=5)\nExperimental Model: MTKAN + STL (Keras 3)\nHorizon: 5 min ahead", color="#DCFCE7", border="#16A34A")
+    # 3. Vision Detection Branch (Top)
+    draw_3d_block(ax, 6.8, 5.6, 2.5, 2.4, depth=0.4, theme="detector",
+                  label="YOLOv8n TRT", sublabel="FP16 Engine", tensor_shape="[1, 300, 6]",
+                  desc="640x640 Bilinear RGB\nClass 0: uniform / PPE")
 
-    # Station Node
-    draw_rounded_box(ax, 9.6, 3.2, 2.8, 2.5, "Master Station (StationOS)", "C# ASP.NET Core .NET 8 Backend\nSignalR Realtime WebSockets\nReact 18 + Electron Dashboard\nSnap7 PLC S7 Ingestion", color="#EDE9FE", border="#7C3AED")
+    # 4. Thermal Forecasting Branch (Bottom)
+    draw_3d_block(ax, 6.8, 1.8, 2.5, 2.4, depth=0.4, theme="forecast",
+                  label="Timeseries Svc", sublabel="FastAPI :8080", tensor_shape="(288, 384) f32",
+                  desc="P2P Radiometric Extract\nHistory CSV Buffering")
+
+    # 5. Model Serving Box
+    draw_3d_block(ax, 10.3, 1.8, 2.6, 2.4, depth=0.4, theme="forecast",
+                  label="Linear Regressor", sublabel="linear_reg.pkl", tensor_shape="Lags=5 -> t+5m",
+                  desc="Autoregressive Serving\nMTKAN (Keras 3 Fallback)")
+
+    # 6. Master Station Platform
+    draw_3d_block(ax, 13.7, 3.6, 2.4, 2.8, depth=0.4, theme="backend",
+                  label="Master Station", sublabel="StationOS .NET 8", tensor_shape="C# API :5000",
+                  desc="SignalR Realtime Hub\nSnap7 S7 PLC | React UI")
 
     # Arrows
-    draw_arrow(ax, 3.8, 6.0, 4.6, 5.5, label="Dual Streams")
-    draw_arrow(ax, 6.7, 4.9, 6.7, 4.5)
-    draw_arrow(ax, 6.7, 3.2, 6.7, 2.8)
-    draw_arrow(ax, 8.8, 3.85, 9.6, 4.2, label="POST /api/person-detection")
-    draw_arrow(ax, 8.8, 2.0, 9.6, 3.6, label="POST /api/prediction")
+    draw_3d_arrow(ax, 2.9, 5.5, 3.5, 5.5, text="RTSP + ISAPI")
+    draw_3d_arrow(ax, 6.1, 6.0, 6.8, 6.8, text="Video Frames")
+    draw_3d_arrow(ax, 6.1, 5.0, 6.8, 3.0, text="ISAPI P2P")
+    draw_3d_arrow(ax, 9.6, 3.0, 10.3, 3.0, text="Lag Window")
+    draw_3d_arrow(ax, 9.6, 6.8, 13.7, 5.6, text="POST /api/person-detection")
+    draw_3d_arrow(ax, 13.2, 3.0, 13.7, 4.4, text="POST /api/prediction")
 
-    plt.tight_layout()
-    fig.savefig(OUTPUT_DIR / "1_end_to_end_pipeline.png", dpi=300)
+    fig.savefig(OUTPUT_DIR / "1_end_to_end_thermal_pipeline.png", dpi=300)
     plt.close(fig)
-    print("Generated 1_end_to_end_pipeline.png")
+    print("Generated 1_end_to_end_thermal_pipeline.png")
 
 
 # ==============================================================================
-# Figure 2: Thermal Detection Pipeline
+# Figure 2: YOLOv8n TensorRT FP16 Architecture
 # ==============================================================================
 def generate_fig2():
-    fig, ax = plt.subplots(figsize=(12, 7.5), dpi=300)
-    ax.set_xlim(0, 12)
-    ax.set_ylim(0, 7.5)
+    fig, ax = plt.subplots(figsize=(16, 10), dpi=300)
+    fig.patch.set_facecolor(THEMES["dark_bg"])
+    ax.set_facecolor(THEMES["dark_bg"])
+    ax.set_xlim(-0.5, 16.5)
+    ax.set_ylim(-0.5, 9.5)
     ax.axis("off")
 
-    ax.text(6.0, 7.1, "2. EDGE PPE / UNIFORM DETECTION PIPELINE (YOLOv8n TENSORRT)", fontsize=13, fontweight="bold", ha="center", color="#0F172A")
-    ax.text(6.0, 6.75, "RTSP Ingestion -> Bilinear Resize -> TensorRT FP16 Engine -> Geometric Filter & Cooldown -> REST Alert", fontsize=8.5, ha="center", color="#64748B")
+    ax.text(8.0, 8.8, "YOLOv8n TensorRT FP16 Detection Architecture", ha="center", va="center",
+            color=THEMES["text_white"], fontsize=18, fontweight="bold")
+    ax.text(8.0, 8.35, "RTSP H.264 Ingestion -> Bilinear RGB Normalization -> TensorRT FP16 -> End-to-End NMS -> Cooldown Dispatcher",
+            ha="center", va="center", color=THEMES["text_muted"], fontsize=10.5)
 
-    draw_rounded_box(ax, 0.5, 4.8, 2.4, 1.4, "RTSP Video Stream", "IP: 192.168.10.152\nSub-stream: 640x360 H.264\nTransport: TCP / No-buffer", color="#E0F2FE", border="#0284C7")
-    draw_rounded_box(ax, 3.4, 4.8, 2.5, 1.4, "Preprocessing", "cv2.resize((640, 640))\nBGR to RGB | Transpose (3, H, W)\nNormalize float32 / 255.0", color="#F1F5F9", border="#64748B")
-    draw_rounded_box(ax, 6.4, 4.8, 2.7, 1.4, "TensorRT FP16 Engine", "yolov8n.engine / best.onnx\nInput: [1, 3, 640, 640]\nOutput: [1, 300, 6] End2End NMS\n(x1, y1, x2, y2, score, class 0)", color="#FEF3C7", border="#D97706")
-    draw_rounded_box(ax, 9.6, 4.8, 2.0, 1.4, "Detection Parsing", "Score >= 0.55\nTarget Class: uniform (0)\nScale back to (w0, h0)", color="#F1F5F9", border="#64748B")
+    stages = [
+        {"x": 0.4, "w": 2.1, "h": 2.8, "theme": "camera", "label": "RTSP Input", "sub": "OpenCV Capture", "shape": "(3, H, W)", "desc": "IP: 192.168.10.152\nSub-stream 102"},
+        {"x": 3.1, "w": 2.1, "h": 2.8, "theme": "preprocess", "label": "Bilinear Prep", "sub": "Resize & Norm", "shape": "[1, 3, 640, 640]", "desc": "BGR to RGB / 255.0\nNCHW float32"},
+        {"x": 5.8, "w": 2.3, "h": 2.8, "theme": "backbone", "label": "YOLOv8n Core", "sub": "Backbone + PAN", "shape": "CSPDarknet+C2f", "desc": "Multiscale Feature\nPyramid (P3, P4, P5)"},
+        {"x": 8.7, "w": 2.2, "h": 2.8, "theme": "detector", "label": "TensorRT FP16", "sub": "Engine Runtime", "shape": "yolov8n.engine", "desc": "CUDA Deserialized\nKernel Optimizations"},
+        {"x": 11.5, "w": 2.1, "h": 2.8, "theme": "detector", "label": "End2End NMS", "sub": "Hardware Output", "shape": "[1, 300, 6]", "desc": "x1, y1, x2, y2, score\nClass 0: uniform"},
+        {"x": 14.1, "w": 2.1, "h": 2.8, "theme": "backend", "label": "Heuristic Filter", "sub": "Alert Cooldown", "shape": "REST Dispatch", "desc": "Area>=800px, 0.2<=AR<=1.2\n60s Anti-Spam Timer"}
+    ]
 
-    draw_rounded_box(ax, 4.0, 1.5, 3.8, 2.0, "Heuristic Geometric Validator", "Filter False Positives:\n• Area >= 800 px (or 4000 in api_send)\n• Width >= 20 px, Height >= 40 px\n• Aspect Ratio: 0.20 <= W/H <= 1.20", color="#FEE2E2", border="#EF4444")
-    draw_rounded_box(ax, 8.5, 1.5, 3.0, 2.0, "Alert Dispatcher & Cooldown", "Cooldown Window: 60s\nPayload: JSON metadata + Boxes\nTarget: StationOS API\nPOST /api/person-detection", color="#EDE9FE", border="#7C3AED")
+    for s in stages:
+        draw_3d_block(ax, s["x"], 3.2, s["w"], s["h"], depth=0.35, theme=s["theme"],
+                      label=s["label"], sublabel=s["sub"], tensor_shape=s["shape"], desc=s["desc"])
 
-    draw_arrow(ax, 2.9, 5.5, 3.4, 5.5)
-    draw_arrow(ax, 5.9, 5.5, 6.4, 5.5)
-    draw_arrow(ax, 9.1, 5.5, 9.6, 5.5)
-    draw_arrow(ax, 10.6, 4.8, 6.0, 3.5, label="Candidate Boxes")
-    draw_arrow(ax, 7.8, 2.5, 8.5, 2.5, label="Valid Detection")
+    draw_3d_arrow(ax, 2.8, 4.6, 3.1, 4.6)
+    draw_3d_arrow(ax, 5.4, 4.6, 5.8, 4.6)
+    draw_3d_arrow(ax, 8.3, 4.6, 8.7, 4.6)
+    draw_3d_arrow(ax, 11.1, 4.6, 11.5, 4.6)
+    draw_3d_arrow(ax, 13.8, 4.6, 14.1, 4.6)
 
-    plt.tight_layout()
-    fig.savefig(OUTPUT_DIR / "2_thermal_detection_pipeline.png", dpi=300)
+    fig.savefig(OUTPUT_DIR / "2_yolov8n_tensor_rt.png", dpi=300)
     plt.close(fig)
-    print("Generated 2_thermal_detection_pipeline.png")
+    print("Generated 2_yolov8n_tensor_rt.png")
 
 
 # ==============================================================================
-# Figure 3: Timeseries Forecasting Pipeline
+# Figure 3: Thermal Matrix Pipeline
 # ==============================================================================
 def generate_fig3():
-    fig, ax = plt.subplots(figsize=(13, 8), dpi=300)
-    ax.set_xlim(0, 13)
-    ax.set_ylim(0, 8)
+    fig, ax = plt.subplots(figsize=(16, 10), dpi=300)
+    fig.patch.set_facecolor(THEMES["dark_bg"])
+    ax.set_facecolor(THEMES["dark_bg"])
+    ax.set_xlim(-0.5, 16.5)
+    ax.set_ylim(-0.5, 9.5)
     ax.axis("off")
 
-    ax.text(6.5, 7.6, "3. MULTI-TARGET TEMPERATURE FORECASTING PIPELINE", fontsize=14, fontweight="bold", ha="center", color="#0F172A")
-    ax.text(6.5, 7.25, "Radiometric P2P Extraction -> Dynamic Buffer -> Multi-Target Regression & MTKAN Evaluation", fontsize=8.5, ha="center", color="#64748B")
+    ax.text(8.0, 8.8, "ISAPI P2P Radiometric Temperature Matrix Extraction", ha="center", va="center",
+            color=THEMES["text_white"], fontsize=18, fontweight="bold")
+    ax.text(8.0, 8.35, "HTTP Digest Protocol -> Multipart Split -> Little-Endian Binary Float32 Decode -> Coordinate Sampling -> History CSV",
+            ha="center", va="center", color=THEMES["text_muted"], fontsize=10.5)
 
-    draw_rounded_box(ax, 0.5, 4.8, 2.6, 1.8, "Hikvision ISAPI P2P", "HTTP Digest GET\n/ISAPI/Thermal/.../jpegPic\nWithAppendData\nMultipart boundary split", color="#E0F2FE", border="#0284C7")
-    draw_rounded_box(ax, 3.6, 4.8, 2.7, 1.8, "Radiometric Extraction", "raw_data byte stream\nnp.frombuffer(p2pData, float32)\nReshape: (288, 384) matrix\nTrue Celsius reading", color="#F1F5F9", border="#64748B")
-    draw_rounded_box(ax, 6.8, 4.8, 2.7, 1.8, "Target Sampling", "thermal_points.json\nMap Points P1-P9 & Zones V1-V2\nNormalized coords (x, y) -> (mx, my)\n5-minute cycle polling", color="#FEF3C7", border="#D97706")
-    draw_rounded_box(ax, 10.0, 4.8, 2.5, 1.8, "Buffer & Storage", "live_thermal_history.csv\nSchema self-rotation\nDynamic target expansion\nMissing data interpolation", color="#F1F5F9", border="#64748B")
+    stages = [
+        {"x": 0.4, "w": 2.2, "h": 2.8, "theme": "camera", "label": "ISAPI HTTP GET", "sub": "Digest Auth", "shape": "Channel 2", "desc": "jpegPicWithAppendData\nBoundary: --boundary"},
+        {"x": 3.2, "w": 2.2, "h": 2.8, "theme": "preprocess", "label": "Multipart Split", "sub": "parse_multipart", "shape": "Header + P2P", "desc": "Extracts JSON meta &\nraw byte chunk"},
+        {"x": 6.0, "w": 2.4, "h": 2.8, "theme": "forecast", "label": "Matrix Decode", "sub": "np.frombuffer", "shape": "(288, 384) f32", "desc": "IEEE-754 32-bit float\nCalibrated Celsius"},
+        {"x": 9.0, "w": 2.3, "h": 2.8, "theme": "forecast", "label": "Zone Sampler", "sub": "thermal_points", "shape": "Points P1-P9", "desc": "Norm coords (x,y) -> (mx,my)\nROI Area Max/Mean"},
+        {"x": 12.0, "w": 2.3, "h": 2.8, "theme": "forecast", "label": "History Logger", "sub": "Self-Rotating CSV", "shape": "live_history", "desc": "Dynamic header sync\n5-minute aggregation"},
+        {"x": 14.8, "w": 1.4, "h": 2.8, "theme": "backend", "label": "REST Push", "sub": "FastAPI", "shape": ":8080", "desc": "To Forecaster"}
+    ]
 
-    # Serving Model Box
-    draw_rounded_box(ax, 1.5, 1.0, 4.6, 2.6, "Production Serving: Autoregressive Linear Regression", "Artifact: linear_reg.pkl\nAlgorithm: Multi-target Ordinary Least Squares\nInput: 5 consecutive lag values (window_size=5)\nOutput: Future temperature (horizon = 5 min ahead)\nRetraining: Background thread every 2 days if data >= min_len", color="#DCFCE7", border="#16A34A")
+    for s in stages:
+        draw_3d_block(ax, s["x"], 3.2, s["w"], s["h"], depth=0.35, theme=s["theme"],
+                      label=s["label"], sublabel=s["sub"], tensor_shape=s["shape"], desc=s["desc"])
 
-    # Experimental Model Box
-    draw_rounded_box(ax, 7.0, 1.0, 4.8, 2.6, "Experimental Benchmark: MTKAN + STL Decomposition", "Artifact: mtkan_model.keras | Framework: Keras 3\nSTL Feature Engine: 24 features (Trend, Seasonal, Resid)\nInput Shape: [None, 5, 24] -> Output Shape: [None, 6]\nReported Test Performance (6 targets):\nMAE: 0.38 - 0.56 C | R2: 0.920 - 0.979", color="#F3E8FF", border="#9333EA")
+    draw_3d_arrow(ax, 2.9, 4.6, 3.2, 4.6)
+    draw_3d_arrow(ax, 5.6, 4.6, 6.0, 4.6)
+    draw_3d_arrow(ax, 8.6, 4.6, 9.0, 4.6)
+    draw_3d_arrow(ax, 11.5, 4.6, 12.0, 4.6)
+    draw_3d_arrow(ax, 14.5, 4.6, 14.8, 4.6)
 
-    draw_arrow(ax, 3.1, 5.7, 3.6, 5.7)
-    draw_arrow(ax, 6.3, 5.7, 6.8, 5.7)
-    draw_arrow(ax, 9.5, 5.7, 10.0, 5.7)
-    draw_arrow(ax, 11.2, 4.8, 3.8, 3.6, label="Serving Lags")
-    draw_arrow(ax, 11.2, 4.8, 9.4, 3.6, label="Benchmark Data")
-
-    plt.tight_layout()
-    fig.savefig(OUTPUT_DIR / "3_timeseries_forecasting_pipeline.png", dpi=300)
+    fig.savefig(OUTPUT_DIR / "3_thermal_matrix_pipeline.png", dpi=300)
     plt.close(fig)
-    print("Generated 3_timeseries_forecasting_pipeline.png")
+    print("Generated 3_thermal_matrix_pipeline.png")
 
 
 # ==============================================================================
-# Figure 4: MTKAN Architecture
+# Figure 4: Linear Regression Forecaster
 # ==============================================================================
 def generate_fig4():
-    fig, ax = plt.subplots(figsize=(12, 7.5), dpi=300)
-    ax.set_xlim(0, 12)
-    ax.set_ylim(0, 7.5)
+    fig, ax = plt.subplots(figsize=(16, 10), dpi=300)
+    fig.patch.set_facecolor(THEMES["dark_bg"])
+    ax.set_facecolor(THEMES["dark_bg"])
+    ax.set_xlim(-0.5, 16.5)
+    ax.set_ylim(-0.5, 9.5)
     ax.axis("off")
 
-    ax.text(6.0, 7.1, "4. MULTIVARIATE TEMPORAL KOLMOGOROV-ARNOLD NETWORK (MTKAN)", fontsize=13, fontweight="bold", ha="center", color="#0F172A")
-    ax.text(6.0, 6.75, "Detailed Architectural Graph of Experimental mtkan_model.keras (Keras 3.14)", fontsize=8.5, ha="center", color="#64748B")
+    ax.text(8.0, 8.8, "Autoregressive Multi-Target Linear Regression Forecaster", ha="center", va="center",
+            color=THEMES["text_white"], fontsize=18, fontweight="bold")
+    ax.text(8.0, 8.35, "Live Production Serving Model: 5-Lag Sliding Window -> Multi-Target OLS -> 5-Minute Ahead Horizon Prediction",
+            ha="center", va="center", color=THEMES["text_muted"], fontsize=10.5)
 
-    layers = [
-        ("InputLayer", "Shape: [None, 5, 24]\n5 time-steps x 24 STL features", "#F1F5F9", "#64748B"),
-        ("TKAN Layer 1", "Units: 64 | return_sequences=True\nactivation='tanh' | recurrent='sigmoid'\nKAN Sub-network Spline Activations", "#EDE9FE", "#7C3AED"),
-        ("Dropout Layer", "Rate: 0.10 | Regularization", "#F1F5F9", "#94A3B8"),
-        ("TKAN Layer 2", "Units: 32 | return_sequences=False\nTemporal Summarization Feature Vector", "#EDE9FE", "#7C3AED"),
-        ("Dense Hidden", "Units: 32 | activation='relu'\nFully Connected Representation", "#FEF3C7", "#D97706"),
-        ("Dropout Layer", "Rate: 0.10 | Regularization", "#F1F5F9", "#94A3B8"),
-        ("Dense Output", "Units: 6 | activation='linear'\n[ID_1_t5, ID_2_t5, ..., ID_6_t5]", "#DCFCE7", "#16A34A")
+    stages = [
+        {"x": 0.5, "w": 2.4, "h": 2.8, "theme": "preprocess", "label": "Sliding Window", "sub": "History CSV", "shape": "window_size=5", "desc": "Lags: [t-4, t-3, t-2, t-1, t]\nPer target point"},
+        {"x": 3.6, "w": 2.4, "h": 2.8, "theme": "preprocess", "label": "Lag Tensor", "sub": "Vectorization", "shape": "[1, 5] float32", "desc": "Clean NaN -> 30.0C default\nTemporal ordering"},
+        {"x": 6.8, "w": 2.8, "h": 2.8, "theme": "forecast", "label": "Linear Model", "sub": "linear_reg.pkl", "shape": "11 Multi-Models", "desc": "y_pred = w * X + b\nPoints 1-9, Zones 1-2"},
+        {"x": 10.3, "w": 2.5, "h": 2.8, "theme": "forecast", "label": "Prediction Vector", "sub": "Target Horizon", "shape": "11 Scalar Temps", "desc": "Forecast at t+5 minutes\nCapped: [0C, 500C]"},
+        {"x": 13.5, "w": 2.4, "h": 2.8, "theme": "backend", "label": "Callback Relay", "sub": "HTTP POST", "shape": ":8100/api/pred", "desc": "StationOS Ingestion\nAlarm Threshold Check"}
     ]
 
-    x_start = 0.6
-    w_box = 1.3
-    gap = 0.35
+    for s in stages:
+        draw_3d_block(ax, s["x"], 3.2, s["w"], s["h"], depth=0.35, theme=s["theme"],
+                      label=s["label"], sublabel=s["sub"], tensor_shape=s["shape"], desc=s["desc"])
 
-    for i, (l_name, l_desc, bg_col, bdr_col) in enumerate(layers):
-        cx = x_start + i * (w_box + gap)
-        draw_rounded_box(ax, cx, 2.2, w_box, 3.2, l_name, l_desc, color=bg_col, border=bdr_col, title_size=9, sub_size=7.5)
-        if i < len(layers) - 1:
-            draw_arrow(ax, cx + w_box, 3.8, cx + w_box + gap, 3.8)
+    draw_3d_arrow(ax, 3.1, 4.6, 3.6, 4.6)
+    draw_3d_arrow(ax, 6.2, 4.6, 6.8, 4.6)
+    draw_3d_arrow(ax, 9.8, 4.6, 10.3, 4.6)
+    draw_3d_arrow(ax, 13.0, 4.6, 13.5, 4.6)
 
-    # Annotation box
-    draw_rounded_box(ax, 2.0, 0.5, 8.0, 1.2, "Mathematical Foundation: Kolmogorov-Arnold Representation Theorem", "Replaces fixed linear matrix weights with learnable 1D B-spline activation functions on edges.\nDesigned for non-linear, multi-scale industrial temperature trend capture with robust resistance to gradient collapse.", color="#FFFFFF", border="#CBD5E1", title_size=8.5, sub_size=7.5)
-
-    plt.tight_layout()
-    fig.savefig(OUTPUT_DIR / "4_mtkan_architecture.png", dpi=300)
+    fig.savefig(OUTPUT_DIR / "4_linear_regression_forecaster.png", dpi=300)
     plt.close(fig)
-    print("Generated 4_mtkan_architecture.png")
+    print("Generated 4_linear_regression_forecaster.png")
 
 
 # ==============================================================================
-# Figure 5: Edge to Station Architecture
+# Figure 5: MTKAN Neural Architecture
 # ==============================================================================
 def generate_fig5():
-    fig, ax = plt.subplots(figsize=(13, 8), dpi=300)
-    ax.set_xlim(0, 13)
-    ax.set_ylim(0, 8)
+    fig, ax = plt.subplots(figsize=(16, 10), dpi=300)
+    fig.patch.set_facecolor(THEMES["dark_bg"])
+    ax.set_facecolor(THEMES["dark_bg"])
+    ax.set_xlim(-0.5, 16.5)
+    ax.set_ylim(-0.5, 9.5)
     ax.axis("off")
 
-    ax.text(6.5, 7.6, "5. EDGE-TO-STATION HARDWARE & COMMUNICATION TOPOLOGY", fontsize=14, fontweight="bold", ha="center", color="#0F172A")
-    ax.text(6.5, 7.25, "Physical Deployment, Network Boundary, and REST / SignalR Protocol Contracts", fontsize=8.5, ha="center", color="#64748B")
+    ax.text(8.0, 8.8, "Experimental MTKAN Temporal Architecture (Keras 3.14)", ha="center", va="center",
+            color=THEMES["text_white"], fontsize=18, fontweight="bold")
+    ax.text(8.0, 8.35, "Input [batch, 5, 24] -> STL Decomposition -> TKAN(64) -> Dropout -> TKAN(32) -> Dense(32) -> Dense(6)",
+            ha="center", va="center", color=THEMES["text_muted"], fontsize=10.5)
 
-    # Edge Container
-    rect_edge = patches.FancyBboxPatch((0.6, 0.8), 5.4, 6.0, boxstyle="round,pad=0.15,rounding_size=0.15", facecolor="#F8FAFC", edgecolor="#0284C7", linewidth=1.5)
-    ax.add_patch(rect_edge)
-    ax.text(3.3, 6.5, "EDGE COMPUTING NODE (NVIDIA Jetson)", fontsize=11, fontweight="bold", ha="center", color="#0369A1")
-
-    draw_rounded_box(ax, 1.0, 4.6, 4.6, 1.5, "Camera Acquisition & ISAPI Client", "Get-Thermal-Jetson-nano & thermal_sender.py\nHTTP Digest Auth | Multipart P2P Binary Stream\n384x288 Radiometric Matrix Parsing", color="#E0F2FE", border="#0284C7")
-    draw_rounded_box(ax, 1.0, 2.8, 4.6, 1.5, "YOLOv8n TensorRT Detector", "yolo_detect.py | Headless Daemon\nRTSP H.264 Ingestion | TensorRT FP16 Inference\nEvent-triggered MP4 recording & Alert dispatch", color="#FEF3C7", border="#D97706")
-    draw_rounded_box(ax, 1.0, 1.0, 4.6, 1.5, "FastAPI Thermal Forecasting Service", "timeseries_service/thermal_receiver.py :8080\nLive CSV History Ingestion | 5-min Horizon Prediction\nAutonomous Background Model Retraining", color="#DCFCE7", border="#16A34A")
-
-    # Station Container
-    rect_station = patches.FancyBboxPatch((7.0, 0.8), 5.4, 6.0, boxstyle="round,pad=0.15,rounding_size=0.15", facecolor="#F8FAFC", edgecolor="#7C3AED", linewidth=1.5)
-    ax.add_patch(rect_station)
-    ax.text(9.7, 6.5, "CENTRAL ORCHESTRATION (Master-Station)", fontsize=11, fontweight="bold", ha="center", color="#5B21B6")
-
-    draw_rounded_box(ax, 7.4, 4.6, 4.6, 1.5, "Backend Core (StationOS.Api)", "C# ASP.NET Core .NET 8 | Port: 5000\nEntity Framework Core (SQLite / PostgreSQL)\nSnap7 PLC Siemens S7 Ingestion Worker\nRule Evaluation Worker (Threshold alerts)", color="#EDE9FE", border="#7C3AED")
-    draw_rounded_box(ax, 7.4, 2.8, 4.6, 1.5, "AI Engine Service (ai_engine)", "Python FastAPI | Port: 8000 | go2rtc RTSP Relay\nLine Crossing Detection (YOLOv8n Object Tracking)\nPartial Discharge Acoustic Analyzer (HSV Hotspot)", color="#EDE9FE", border="#7C3AED")
-    draw_rounded_box(ax, 7.4, 1.0, 4.6, 1.5, "Monitoring Desktop Frontend", "React 18 + Vite + TailwindCSS + Electron Client\nDynamic SVG Single Line Diagram (SLD)\nSub-second WebRTC Camera View & Alert History", color="#FCE7F3", border="#DB2777")
-
-    # Communication Arrows
-    draw_arrow(ax, 5.6, 3.55, 7.4, 5.35, label="POST /api/person-detection")
-    draw_arrow(ax, 5.6, 1.75, 7.4, 4.85, label="POST /api/prediction")
-    draw_arrow(ax, 7.4, 4.4, 5.6, 1.3, label="POST /config/thermal (Sync)")
-
-    plt.tight_layout()
-    fig.savefig(OUTPUT_DIR / "5_edge_to_station_architecture.png", dpi=300)
-    plt.close(fig)
-    print("Generated 5_edge_to_station_architecture.png")
-
-
-# ==============================================================================
-# Figure 6: Model Comparison
-# ==============================================================================
-def generate_fig6():
-    fig, ax = plt.subplots(figsize=(12, 7), dpi=300)
-    ax.axis("off")
-
-    ax.text(0.5, 0.95, "6. SYSTEM MODEL AUDIT & SPECIFICATION COMPARISON", fontsize=13, fontweight="bold", ha="left", color="#0F172A", transform=ax.transAxes)
-    ax.text(0.5, 0.91, "Direct Artifact Verification Matrix: Vision, Regression, and Neural Network Modules", fontsize=8.5, ha="left", color="#64748B", transform=ax.transAxes)
-
-    table_data = [
-        ["Model Property", "Uniform/PPE Detector", "Live Thermal Forecaster", "Experimental MTKAN", "Line Crossing Detector"],
-        ["Artifact File", "models/best.onnx\nmodels/yolov8n.engine", "timeseries_service/model/\nlinear_reg.pkl", "timeseries_service/model/\nmtkan_model.keras", "Master-Station/ai_engine/\nyolov8n.pt"],
-        ["Framework", "TensorRT / PyTorch (Ultralytics)", "Scikit-Learn LinearRegression", "TensorFlow / Keras 3.14 (TKAN)", "Ultralytics PyTorch"],
-        ["Runtime Status", "Production Serving", "Production Serving", "Experimental / Benchmark", "Production Serving"],
-        ["Input Tensor / Dtype", "[1, 3, 640, 640] float32 RGB", "[5] float32 (Lags t-4 to t)", "[None, 5, 24] float32 (STL)", "[1, 3, H, W] BGR (RTSP)"],
-        ["Output Dimension", "[1, 300, 6] (End2End NMS)", "1 float scalar per target", "[None, 6] (6 target predictions)", "Bounding Boxes + Track IDs"],
-        ["Target Semantics", "uniform (Class ID: 0)", "Celsius (+5 min forecast)", "Celsius (+5 min, 6 points)", "person (0), car (2)"],
-        ["Reported Metrics", "Not committed in repo", "Extrapolation baseline", "MAE: 0.38-0.56 C | R2: 0.92-0.98", "Pretrained COCO Weights"],
-        ["Hardware Role", "Jetson Orin Nano TensorRT", "Jetson Orin Nano CPU/RAM", "Jetson / Server Fallback", "Station Server CPU / CUDA"]
+    layers = [
+        {"x": 0.4, "w": 1.8, "h": 2.8, "theme": "preprocess", "label": "STL Features", "sub": "statsmodels STL", "shape": "[None, 5, 24]", "desc": "Trend, Seasonal, Resid\n6 targets x 4 = 24 dims"},
+        {"x": 2.7, "w": 2.0, "h": 2.8, "theme": "fusion", "label": "TKAN Layer 1", "sub": "units=64", "shape": "[None, 5, 64]", "desc": "return_sequences=True\nactivation='tanh'"},
+        {"x": 5.2, "w": 1.6, "h": 2.8, "theme": "preprocess", "label": "Dropout 1", "sub": "rate=0.10", "shape": "[None, 5, 64]", "desc": "Regularization"},
+        {"x": 7.3, "w": 2.0, "h": 2.8, "theme": "fusion", "label": "TKAN Layer 2", "sub": "units=32", "shape": "[None, 32]", "desc": "return_sequences=False\nSpline weight functions"},
+        {"x": 9.8, "w": 1.9, "h": 2.8, "theme": "backbone", "label": "Dense Layer", "sub": "units=32", "shape": "[None, 32]", "desc": "activation='relu'\nRepresentation map"},
+        {"x": 12.2, "w": 1.6, "h": 2.8, "theme": "preprocess", "label": "Dropout 2", "sub": "rate=0.10", "shape": "[None, 32]", "desc": "Regularization"},
+        {"x": 14.3, "w": 1.8, "h": 2.8, "theme": "detector", "label": "Output Head", "sub": "units=6", "shape": "[None, 6]", "desc": "[ID_1_t5 ... ID_6_t5]\nReported MAE: 0.38-0.56"}
     ]
 
-    col_widths = [0.22, 0.20, 0.20, 0.20, 0.18]
-    table = ax.table(cellText=table_data, colWidths=col_widths, loc="center", cellLoc="center")
-    table.auto_set_font_size(False)
-    table.set_fontsize(7.8)
-    table.scale(1.0, 2.2)
+    for l in layers:
+        draw_3d_block(ax, l["x"], 3.2, l["w"], l["h"], depth=0.35, theme=l["theme"],
+                      label=l["label"], sublabel=l["sub"], tensor_shape=l["shape"], desc=l["desc"])
 
-    # Style table headers and cells
-    for (row, col), cell in table.get_celld().items():
-        cell.set_edgecolor("#CBD5E1")
-        if row == 0:
-            cell.set_facecolor("#1E293B")
-            cell.get_text().set_color("#FFFFFF")
-            cell.get_text().set_weight("bold")
-        elif col == 0:
-            cell.set_facecolor("#F8FAFC")
-            cell.get_text().set_weight("bold")
-            cell.get_text().set_color("#0F172A")
-        elif row % 2 == 1:
-            cell.set_facecolor("#FFFFFF")
-        else:
-            cell.set_facecolor("#F1F5F9")
+    draw_3d_arrow(ax, 2.4, 4.6, 2.7, 4.6)
+    draw_3d_arrow(ax, 4.9, 4.6, 5.2, 4.6)
+    draw_3d_arrow(ax, 7.0, 4.6, 7.3, 4.6)
+    draw_3d_arrow(ax, 9.5, 4.6, 9.8, 4.6)
+    draw_3d_arrow(ax, 11.9, 4.6, 12.2, 4.6)
+    draw_3d_arrow(ax, 14.0, 4.6, 14.3, 4.6)
 
-    plt.tight_layout()
+    fig.savefig(OUTPUT_DIR / "5_mtkan_architecture.png", dpi=300)
+    plt.close(fig)
+    print("Generated 5_mtkan_architecture.png")
+
+
+# ==============================================================================
+# Figure 6: Model Comparison 3D Matrix
+# ==============================================================================
+def generate_fig6():
+    fig, ax = plt.subplots(figsize=(16, 10), dpi=300)
+    fig.patch.set_facecolor(THEMES["dark_bg"])
+    ax.set_facecolor(THEMES["dark_bg"])
+    ax.set_xlim(-0.5, 16.5)
+    ax.set_ylim(-0.5, 9.5)
+    ax.axis("off")
+
+    ax.text(8.0, 8.8, "System Model Role & Technical Specification Comparison", ha="center", va="center",
+            color=THEMES["text_white"], fontsize=18, fontweight="bold")
+    ax.text(8.0, 8.35, "Direct Artifact Verification: Vision Detector, Serving Forecaster, and Research Deep Learning Model",
+            ha="center", va="center", color=THEMES["text_muted"], fontsize=10.5)
+
+    # 3 Big volumetric comparative cards
+    draw_3d_block(ax, 0.6, 2.2, 4.6, 4.8, depth=0.45, theme="detector",
+                  label="YOLOv8n TensorRT", sublabel="models/best.onnx\nmodels/yolov8n.engine", tensor_shape="[1, 3, 640, 640] -> [1, 300, 6]",
+                  desc="Role: Production PPE Detection\nTarget: class 0 (uniform)\nThreshold: 0.55 | Cooldown: 60s\nRuntime: TensorRT FP16 Engine")
+
+    draw_3d_block(ax, 5.8, 2.2, 4.6, 4.8, depth=0.45, theme="forecast",
+                  label="Linear Regression", sublabel="timeseries_service/model/\nlinear_reg.pkl", tensor_shape="[5 Lags] -> [1 Future Scalar]",
+                  desc="Role: Production Serving Forecaster\nAlgorithm: Multi-target OLS\nHorizon: 5 min ahead (11 targets)\nTraining: Background auto-retrain")
+
+    draw_3d_block(ax, 11.0, 2.2, 4.6, 4.8, depth=0.45, theme="fusion",
+                  label="MTKAN (Temporal KAN)", sublabel="timeseries_service/model/\nmtkan_model.keras", tensor_shape="[None, 5, 24] -> [None, 6]",
+                  desc="Role: Experimental Benchmark\nArchitecture: 2x TKAN + 2x Dense\nReported Test MAE: 0.38 - 0.56 C\nReported Test R2: 0.920 - 0.979")
+
     fig.savefig(OUTPUT_DIR / "6_model_comparison.png", dpi=300)
     plt.close(fig)
     print("Generated 6_model_comparison.png")
@@ -301,4 +373,4 @@ if __name__ == "__main__":
     generate_fig4()
     generate_fig5()
     generate_fig6()
-    print("All 6 architecture diagrams generated successfully at 300 DPI.")
+    print("AI-Thermal-detect: All 6 3D volumetric tensor block figures generated successfully at 300 DPI.")
