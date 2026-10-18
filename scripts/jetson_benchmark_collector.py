@@ -69,16 +69,24 @@ def collect_system_info():
         except ImportError:
             sys_info["trtexec_version"] = "trtexec / tensorrt not in PATH"
 
-    # 5. nvidia-smi or tegrastats
+    # 5. nvidia-smi or tegrastats fallback
     code, out, _ = run_cmd(["nvidia-smi", "--query-gpu=name,driver_version,memory.total", "--format=csv,noheader"])
     if code == 0 and out:
         sys_info["gpu_info"] = out
     else:
-        sys_info["gpu_info"] = "nvidia-smi not available (standard for Tegra iGPU; use tegrastats)"
+        # Fallback to tegrastats 1 sample or jtop if available
+        code_t, out_t, _ = run_cmd(["tegrastats", "--interval", "1000"], timeout=2)
+        if out_t:
+            sys_info["gpu_info"] = f"tegrastats: {out_t.splitlines()[0]}"
+        else:
+            sys_info["gpu_info"] = "Tegra iGPU (integrated SoC; nvidia-smi not supported, tegrastats monitored via log)"
 
     # 6. nvpmodel & jetson_clocks
-    code, out, _ = run_cmd(["nvpmodel", "-q"])
-    sys_info["nvpmodel_status"] = out if code == 0 else "nvpmodel query failed or requires sudo"
+    code_m, out_m, _ = run_cmd(["nvpmodel", "-q"])
+    sys_info["nvpmodel_status"] = out_m if code_m == 0 else "nvpmodel query failed or requires sudo"
+
+    code_c, out_c, _ = run_cmd(["jetson_clocks", "--show"])
+    sys_info["jetson_clocks_status"] = out_c if code_c == 0 else "jetson_clocks check skipped (requires sudo or not installed)"
 
     # 7. Thermal status via sysfs
     thermal_zones = {}

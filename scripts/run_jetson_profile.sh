@@ -58,6 +58,20 @@ if command -v nvpmodel >/dev/null 2>&1; then
     echo "--- nvpmodel -q ---" >> "${SYS_FILE}"
     sudo nvpmodel -q >> "${SYS_FILE}" 2>&1 || nvpmodel -q >> "${SYS_FILE}" 2>&1 || true
 fi
+if command -v jetson_clocks >/dev/null 2>&1; then
+    echo "--- jetson_clocks --show ---" >> "${SYS_FILE}"
+    sudo jetson_clocks --show >> "${SYS_FILE}" 2>&1 || true
+fi
+
+echo "[5b/7] Sampling tegrastats (3 seconds)..."
+if command -v tegrastats >/dev/null 2>&1; then
+    tegrastats --interval 1000 --logfile "${OUTPUT_DIR}/tegrastats_sample.log" &
+    TEGRA_PID=$!
+    sleep 3
+    kill $TEGRA_PID 2>/dev/null || true
+    echo "--- tegrastats snapshot ---" >> "${SYS_FILE}"
+    head -n 5 "${OUTPUT_DIR}/tegrastats_sample.log" >> "${SYS_FILE}" 2>&1 || true
+fi
 
 echo "[6/7] Querying Thermal Zones..."
 echo "--- Thermal Zones ---" >> "${SYS_FILE}"
