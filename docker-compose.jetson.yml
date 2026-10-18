@@ -1,0 +1,25 @@
+# ==============================================================================
+# docker-compose.jetson.yml
+# NVIDIA Jetson L4T / TensorRT Container Profile
+# Requires NVIDIA Container Runtime (`--runtime=nvidia` or `default-runtime: nvidia`)
+# ==============================================================================
+
+services:
+  edge-ai-thermal:
+    image: nvcr.io/nvidia/l4t-tensorrt:r8.5.2.2-devel
+    container_name: edge_ai_thermal_jetson
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility,video
+      - API_PORT=8080
+      - ENGINE_PATH=/app/models/yolov8n.engine
+      - RTSP_SOURCE=rtsp://admin:Demo%402024@192.168.10.152:554/Streaming/Channels/102
+      - MASTER_STATION_URL=http://master-station:5000/api/person-detection
+    network_mode: host
+    volumes:
+      - .:/app
+      - /tmp/argus_socket:/tmp/argus_socket
+    working_dir: /app
+    command: python3 main_all.py
+    restart: unless-stopped

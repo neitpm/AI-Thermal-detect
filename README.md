@@ -234,8 +234,58 @@ python3 main_all.py --thermal-only
 
 ---
 
-## 8. Limitations & Scope Disclosure
+## 8. Docker Architecture & Container Deployment
+
+#### Figure 7: Containerized Edge AI Inference & Time-Series Pipeline
+*NVIDIA Jetson Host runtime separation: CPU fallback forecasting container vs Jetson TensorRT GPU profile.*
+![Docker AI Pipeline 3D](docs/figures/docker_ai_pipeline_3d.png)
+
+The repository provides production Docker and Compose profiles separating lightweight CPU time-series forecasting from GPU-accelerated TensorRT inference.
+
+### A. Environment Variables
+| Variable | Default Value | Description |
+|---|---|---|
+| `API_PORT` | `8080` | Internal and published port for the FastAPI thermal receiver |
+| `HORIZON` | `5` | Forecast horizon in minutes for future temperature prediction |
+| `MODEL_DIR` | `/app/timeseries_service/model` | Path to serialized model artifacts (`linear_reg.pkl`, scalers) |
+| `DATA_DIR` | `/app/timeseries_service/data` | Path to persistent storage for historical and predicted CSVs |
+| `PREDICTION_CALLBACK_URL` | `http://master-station:8100/api/prediction` | Destination webhook URL on Master-Station |
+
+### B. CPU Profile Quickstart (FastAPI + Linear Regression)
+```bash
+# 1. Validate Docker Compose configuration
+docker compose config
+
+# 2. Build and start the containerized service in background
+docker compose up -d --build
+
+# 3. Verify running service status and healthcheck
+docker compose ps
+
+# 4. Query live healthcheck endpoint
+curl -fsS http://localhost:8080/health
+# Response: {"status":"ok"}
+
+# 5. Run Python Docker container smoke test
+python scripts/docker_smoke_test.py
+
+# 6. Stop and remove container
+docker compose down
+```
+
+### C. NVIDIA Jetson Profile Quickstart (TensorRT GPU)
+For NVIDIA Jetson Orin Nano / Jetson Nano running JetPack with the NVIDIA Container Runtime:
+```bash
+# Start Jetson TensorRT profile with host networking
+docker compose -f docker-compose.jetson.yml up -d
+```
+
+---
+
+## 9. Limitations & Scope Disclosure
 
 1. **Detection Dataset & Benchmarking:** Detection checkpoint is included, but the original training dataset and official validation logs are not included in this repository. Target framerates vary by hardware configuration and power modes (`nvpmodel`).
 2. **Model Roles:** Production serving uses autoregressive Linear Regression (`linear_reg.pkl`) for minimal latency; MTKAN represents an experimental benchmark model.
-3. **Thermal Scope:** The forecasting pipeline predicts continuous temperature trajectories; operational threshold anomaly scoring is handled downstream by Master-Station rule engines.
+3. **Container Hardware Boundaries:** TensorRT GPU execution requires the NVIDIA Container Toolkit (`--runtime=nvidia`) and JetPack-compatible L4T base images. On x86/ARM without NVIDIA GPUs, the container gracefully falls back to CPU Linear Regression and ONNX Runtime.
+4. **Thermal Scope:** The forecasting pipeline predicts continuous temperature trajectories; operational threshold anomaly scoring is handled downstream by Master-Station rule engines.
+

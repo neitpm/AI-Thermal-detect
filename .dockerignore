@@ -1,0 +1,24 @@
+# Git and IDE ignores
+.git
+.gitignore
+.codex
+.vscode
+.idea
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Python virtual environments
+.venv
+venv
+env
+tf_env
+
+# Local runtime data and heavy weights
+*.zip
+*.tar.gz
+*.mp4
+*.avi
+runs/
+*.log
