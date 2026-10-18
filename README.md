@@ -114,12 +114,14 @@ The vision detection service operates headlessly without GUI dependencies to max
 - **Inference Runtime:** Precompiled **TensorRT FP16 Engine** (`models/yolov8n.engine`, `models/best.engine`).
 - **Input Dimensions:** `[1, 3, 640, 640]` float32 contiguous array in RGB format.
 - **Output Tensor:** `[1, 300, 6]`, where each anchor prediction represents:
-  $$\text{Box} = \left[ x_1, y_1, x_2, y_2, \text{confidence}, \text{class\_id} \right]$$
+  ```text
+  Box = [x1, y1, x2, y2, confidence, class_id]
+  ```
   *(Output includes embedded hardware-accelerated NMS filtering; `class_id = 0` corresponds to verified dataset class `uniform`).*
 - **False-Positive Mitigation:**
-  - Confidence thresholding: $\text{conf} \ge 0.55$.
-  - Spatial aspect ratio constraint: $0.20 \le \frac{W}{H} \le 1.20$.
-  - Minimum area filter: $W \ge 20\,\text{px}$, $H \ge 40\,\text{px}$, $\text{Area} \ge 800\,\text{px}^2$.
+  - Confidence thresholding: `conf >= 0.55`.
+  - Spatial aspect ratio constraint: `0.20 <= (W / H) <= 1.20`.
+  - Minimum area filter: `W >= 20 px`, `H >= 40 px`, `Area >= 800 px²`.
   - Alert Cooldown: 60-second minimum interval per camera stream to prevent redundant alerts.
 
 ---
@@ -150,7 +152,9 @@ Rather than relying solely on scalar thresholds, the system extracts dense radio
 - **Framework:** TensorFlow / Keras 3.14 (`Sequential`).
 - **Feature Engineering:** STL (Seasonal-Trend decomposition using LOESS) splits each target series into **Trend**, **Seasonal**, and **Residual** components, expanding 6 raw series into a **24-dimensional feature vector**.
 - **Network Topology:**
-  $$\text{Input}(5, 24) \longrightarrow \text{TKAN}(64, \text{return\_seq}=\text{True}) \longrightarrow \text{Dropout}(0.1) \longrightarrow \text{TKAN}(32) \longrightarrow \text{Dense}(32, \text{ReLU}) \longrightarrow \text{Dense}(6)$$
+  ```text
+  Input(5, 24) -> TKAN(64, return_sequences=True) -> Dropout(0.1) -> TKAN(32) -> Dense(32, ReLU) -> Dense(6)
+  ```
 - **Role:** Maintained as an offline research benchmark for complex non-linear seasonal thermal phenomena.
 
 ---
