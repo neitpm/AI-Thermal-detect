@@ -113,8 +113,8 @@ def verify():
                 outputs = session.run(None, {input_name: dummy})
                 res_tensor = outputs[0]
                 
-                # Check shape & numerical sanity
-                assert res_tensor.shape == (1, 5, 8400), f"Unexpected shape {res_tensor.shape}"
+                # Check shape & numerical sanity (best.onnx includes end2end NMS: [1, 300, 6])
+                assert res_tensor.shape == (1, 300, 6), f"Unexpected shape {res_tensor.shape}"
                 assert not np.isnan(res_tensor).any(), "NaN values found in inference output!"
                 assert not np.isinf(res_tensor).any(), "Inf values found in inference output!"
                 print(f"  [PASS] ONNX forward pass succeeded: shape={res_tensor.shape}, zero NaN/Inf.")
