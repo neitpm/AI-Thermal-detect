@@ -1,0 +1,103 @@
+[
+  {
+    "artifact": "models/yolo_uniform.onnx",
+    "local_path": "models/best.onnx",
+    "type": "detection",
+    "architecture": "Ultralytics YOLOv8n (FP32 ONNX export)",
+    "input_contract": "images: [1, 3, 640, 640] float32, normalized to [0, 1]",
+    "output_contract": "output0: [1, 5, 8400] float32 (cx, cy, w, h, uniform_conf)",
+    "classes": {
+      "0": "uniform"
+    },
+    "size_bytes": 9757745,
+    "sha256": "54c9e4b591cf5cf60a5dc1e3e5114d4e134ead24ba04c6460237a5adac3136e0"
+  },
+  {
+    "artifact": "models/yolo_uniform.pt",
+    "local_path": "models/best.pt",
+    "type": "detection",
+    "architecture": "Ultralytics YOLOv8n (PyTorch Checkpoint)",
+    "input_contract": "images: [1, 3, 640, 640] float32",
+    "output_contract": "Ultralytics Results objects / tensor [1, 5, 8400]",
+    "classes": {
+      "0": "uniform"
+    },
+    "size_bytes": 5369221,
+    "sha256": "1cf912bfda1de8f324cd136d38aa6e20dc277c9ce28dcf382f7b36d935a78b0a"
+  },
+  {
+    "artifact": "models/yolov8n.engine",
+    "local_path": "models/yolov8n.engine",
+    "type": "detection",
+    "architecture": "TensorRT FP16 Engine compiled from best.onnx",
+    "input_contract": "images: [1, 3, 640, 640] float32/fp16",
+    "output_contract": "output0: [1, 5, 8400] fp16",
+    "classes": {
+      "0": "uniform"
+    },
+    "size_bytes": 9169244,
+    "sha256": "80d7ead07faea152c8f74aeb8b60cb8aad72569e74494eecc31e0fdec73e9f29"
+  },
+  {
+    "artifact": "forecasting/linear_reg.pkl",
+    "local_path": "timeseries_service/model/linear_reg.pkl",
+    "type": "forecasting_serving",
+    "architecture": "Multi-target Autoregressive Linear Regression (11 independent estimators)",
+    "input_contract": "Per-target autoregressive lag vector: [1, 5] (5 most recent historical temperatures per channel)",
+    "output_contract": "Predicted temperature 5 minutes ahead: float (evaluated across 11 targets in parallel)",
+    "horizon_minutes": 5,
+    "window_size": 5,
+    "size_bytes": 3326,
+    "sha256": "2e449f6d64c3b0147fc89058702aaf57be87dcc3ddf9454eb19623aea6896b7b"
+  },
+  {
+    "artifact": "forecasting/scaler_X.pkl",
+    "local_path": "timeseries_service/model/scaler_X.pkl",
+    "type": "preprocessor",
+    "architecture": "StandardScaler for 24 multi-channel time-series features",
+    "size_bytes": 1191,
+    "sha256": "9fb65a8519c734b6636ecf6e9a799fdfa226c877432561e3686d49fb4150f00c"
+  },
+  {
+    "artifact": "forecasting/scaler_y.pkl",
+    "local_path": "timeseries_service/model/scaler_y.pkl",
+    "type": "preprocessor",
+    "architecture": "StandardScaler for 6 target temperature points",
+    "size_bytes": 759,
+    "sha256": "97c28c016417dcb9702932018b632d98fcfbf48caa360b6250b18726929e3064"
+  },
+  {
+    "artifact": "forecasting/mtkan_model.keras",
+    "local_path": "timeseries_service/model/mtkan_model.keras",
+    "type": "forecasting_experimental",
+    "architecture": "Temporal Kolmogorov-Arnold Network (Keras 3.14: 2x TKAN + Dense)",
+    "input_contract": "Time-series sequence [batch, window_size, 44] (including STL trend/seasonal/resid)",
+    "output_contract": "Predicted temperatures [batch, 11]",
+    "size_bytes": 965695,
+    "sha256": "59edfd1daf6ab0208a69740bc35f767274ada692c301ac4d716d939886526d95"
+  },
+  {
+    "artifact": "forecasting/mtkan_weights.weights.h5",
+    "local_path": "timeseries_service/model/mtkan_weights.weights.h5",
+    "type": "forecasting_experimental_weights",
+    "architecture": "H5 weights for mtkan_model.keras",
+    "size_bytes": 961024,
+    "sha256": "e57d42103f1099c246572cf75ca39c1aa272075529962d2ed73ef86964711d44"
+  },
+  {
+    "artifact": "forecasting/config.json",
+    "local_path": "timeseries_service/model/config.json",
+    "type": "configuration",
+    "architecture": "Channel targets definition, window size (5), horizon (5), STL feature mapping",
+    "size_bytes": 1882,
+    "sha256": "2d69b4c013b55de8c07d0e8f6bf632c23f84530109825aea789218c75ecbe391"
+  },
+  {
+    "artifact": "forecasting/metrics_test.csv",
+    "local_path": "timeseries_service/model/metrics_test.csv",
+    "type": "benchmark_metrics",
+    "architecture": "Test set evaluation results (MAE 0.38-0.56 C, R2 >= 0.92 across 6 test targets)",
+    "size_bytes": 400,
+    "sha256": "bff23c8bbd0461603a6bfb5d36f3c2e6c86ae2f563df55fadb2ed8cce2ff4055"
+  }
+]

@@ -282,7 +282,56 @@ docker compose -f docker-compose.jetson.yml up -d
 
 ---
 
-## 9. Limitations & Scope Disclosure
+## 9. Model Artifacts & Hugging Face Hub
+
+Official model checkpoints, precompiled TensorRT engines, and forecasting artifacts are published and versioned on Hugging Face:
+
+🔗 **Hugging Face Hub:** [neitpm/ai-thermal-detect-models](https://huggingface.co/neitpm/ai-thermal-detect-models)
+
+### Verified Hub Layout
+```text
+models/
+  yolo_uniform.onnx              # Ultralytics YOLOv8n ONNX FP32 [1, 5, 8400]
+  yolo_uniform.pt                # PyTorch Checkpoint (names: {0: 'uniform'})
+  yolov8n.engine                 # TensorRT FP16 compiled engine
+forecasting/
+  linear_reg.pkl                 # Autoregressive Linear Regression (11 estimators, serving)
+  scaler_X.pkl                   # Feature StandardScaler (24 inputs)
+  scaler_y.pkl                   # Target StandardScaler (6 outputs)
+  mtkan_model.keras              # Experimental Temporal KAN model (Keras 3)
+  mtkan_weights.weights.h5       # MTKAN model weights
+  config.json                    # Channel definitions, window size (5), horizon (5)
+  metrics_test.csv               # Empirical test split metrics for forecasting
+scripts/
+  infer_yolo.py                  # Standalone YOLO inference script
+  forecast_temperature.py        # Multi-target temperature forecasting script
+metadata/
+  model_manifest.json            # Exact input/output contracts, shapes, byte sizes
+  checksums.sha256               # Cryptographic SHA-256 digests
+```
+
+### Download Artifacts via Python
+```python
+from huggingface_hub import snapshot_download
+
+# Download all verified artifacts into a local directory
+local_dir = snapshot_download(
+    repo_id="neitpm/ai-thermal-detect-models",
+    local_dir="models_from_hub",
+    repo_type="model",
+)
+```
+
+### Runtime Separation & Verification
+* **CPU ONNX Inference:** Validated with ONNX Runtime (`infer_yolo.py`) for CPU fallback.
+* **TensorRT Jetson Inference:** Precompiled FP16 engine (`yolov8n.engine`) configured for Jetson deployments.
+* **Production Serving Forecaster:** Autoregressive Linear Regression (`linear_reg.pkl`) serving 11 targets with 5-minute horizon ($< 0.2\text{ ms}$ latency).
+* **Experimental Forecaster:** MTKAN (`mtkan_model.keras`) benchmarked for research comparison (MAE $0.38\text{--}0.56^\circ\text{C}$).
+* **Integrity Guarantee:** Verified with cryptographic SHA-256 manifest in `metadata/checksums.sha256`.
+
+---
+
+## 10. Limitations & Scope Disclosure
 
 1. **Detection Dataset & Benchmarking:** Detection checkpoint is included, but the original training dataset and official validation logs are not included in this repository. Target framerates vary by hardware configuration and power modes (`nvpmodel`).
 2. **Model Roles:** Production serving uses autoregressive Linear Regression (`linear_reg.pkl`) for minimal latency; MTKAN represents an experimental benchmark model.
